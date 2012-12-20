@@ -1,5 +1,5 @@
 <?php
-namespace \SlapOM;
+namespace SlapOM;
 
 use SlapOM\Exception\SlapOM as SlapOMException;
 use SlapOM\Exception\Ldap as LdapException;
