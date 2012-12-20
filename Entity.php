@@ -59,7 +59,7 @@ abstract class Entity extends \ArrayObject
     public function __call($method, $arguments)
     {
         list($operation, $attribute) = preg_split('/(?=[A-Z])/', $method, 2);
-        $attribute = StrUtil::underscore($attribute);
+        $attribute = strtolower($attribute[0]).substr($attribute, 1);
 
         switch($operation)
         {

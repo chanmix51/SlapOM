@@ -7,16 +7,16 @@ use SlapOM\Exception\Ldap as LdapException;
 class Connection
 {
     protected $handler;
-    protected $bind_dn;
     protected $host;
     protected $port;
+    protected $login;
     protected $password;
     protected $maps = array();
     protected $error;
 
-    public function __construct($bind_dn, $host, $port = 389, $password = null)
+    public function __construct($host, $login, $password = null, $port = 389)
     {
-        $this->bind_dn = $bind_dn;
+        $this->login = $login;
         $this->host = $host;
         $this->port = $port;
         $this->password = $password;
@@ -69,9 +69,9 @@ class Connection
         ldap_get_option($this->handler,LDAP_OPT_ERROR_STRING,$this->error);
         ldap_set_option($this->handler, LDAP_OPT_PROTOCOL_VERSION, 3);
 
-        if (!@ldap_bind($this->handler, $this->bind_dn, $this->password))
+        if (!@ldap_bind($this->handler, $this->login, $this->password))
         {
-            throw new LdapException(sprintf("Could not bind to DN='%s'.", $this->bind_dn, $this->handler, $this->error));
+            throw new LdapException(sprintf("Could not bind to LDAP with login='%s'.", $this->login, $this->handler, $this->error));
         }
     }
 
