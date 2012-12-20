@@ -48,8 +48,15 @@ abstract class EntityMap
         $results = $this->connection->search($dn, $filter, $this->getAttributes(), $limit);
 
         $entity_class = $this->entity_class;
+        $entities = array();
 
-        return new ArrayIterator(array_map($results, function($val) use ($entity_class) { return new $entity_class($val); }));
+            var_dump($results); exit;
+        foreach ($results as $result)
+        {
+            $entities[] = new $entity_class($result);
+        }
+
+        return new \ArrayIterator($entities);
     }
 
     public function getAttributes()

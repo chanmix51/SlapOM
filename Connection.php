@@ -34,7 +34,8 @@ class Connection
     {
         if (!isset($this->maps[$class]) or $renew === true)
         {
-            $this->maps[$class] = new $class($this);
+            $class_name = sprintf("%sMap", $class);
+            $this->maps[$class] = new $class_name($this);
         }
 
         return $this->maps[$class];
@@ -54,7 +55,7 @@ class Connection
 
     protected function isOpen()
     {
-        return !(is_null($this->handler) or $this->handler !== false);
+        return !(is_null($this->handler) or $this->handler === false);
     }
 
     protected function connect()
@@ -82,6 +83,6 @@ class Connection
             $this->connect();
         }
 
-        return $this->handler();
+        return $this->handler;
     }
 }
