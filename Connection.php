@@ -69,6 +69,7 @@ class Connection
 
         ldap_get_option($this->handler,LDAP_OPT_ERROR_STRING,$this->error);
         ldap_set_option($this->handler, LDAP_OPT_PROTOCOL_VERSION, 3);
+        ldap_set_option($this->handler, LDAP_OPT_REFERRALS, 0);
 
         if (!@ldap_bind($this->handler, $this->login, $this->password))
         {

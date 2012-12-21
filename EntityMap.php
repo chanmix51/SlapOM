@@ -5,6 +5,9 @@ use SlapOM\Exception\SlapOM as SlapOMException;
 
 abstract class EntityMap
 {
+    const FIELD_MULTIVALUED = 1;
+    const FIELD_BINARY      = 2;
+
     protected $connection;
     protected $base_dn;
     protected $ldap_object_class;
@@ -42,30 +45,58 @@ abstract class EntityMap
 
     public function find($filter, $dn_suffix = null, $limit = 0)
     {
-        $dn = is_null($dn_suffix) ? $this->base_dn : $this->base_dn.",".$dn_suffix;
+        $dn = is_null($dn_suffix) ? $this->base_dn : $dn_suffix.",".$this->base_dn;
         $filter = sprintf("(&(objectClass=%s)%s)", $this->ldap_object_class, $filter);
 
-        $results = $this->connection->search($dn, $filter, $this->getAttributes(), $limit);
+        $results = $this->connection->search($dn, $filter, $this->getAttributeNames(), $limit);
 
+        return $this->processResults($results);
+    }
+
+    public function getAttributeNames()
+    {
+        return array_keys($this->attributes);
+    }
+
+    public function addAttribute($name, $modifier = 0)
+    {
+        $this->attributes[$name] = $modifier;
+    }
+
+    public function getAttributeModifiers($name)
+    {
+        return $this->attributes[$name];
+    }
+
+    protected function processResults($results)
+    {
         $entity_class = $this->entity_class;
         $entities = array();
 
-            var_dump($results); exit;
-        foreach ($results as $result)
+        if ($results['count'] > 0)
         {
-            $entities[] = new $entity_class($result);
+            unset($results['count']);
+            // iterate on results
+            foreach ($results as $result)
+            {
+                $result = array_filter($result, function($val) { return is_array($val); });
+                array_walk($result, array($this, 'processFieldValue'));
+
+                $entities[] = new $entity_class($result);
+            }
         }
 
         return new \ArrayIterator($entities);
     }
 
-    public function getAttributes()
+    protected function processFieldValue(&$value, $field)
     {
-        return $this->attributes;
+        unset($value['count']);
+
+        if (!$this->getAttributeModifiers($field) & static::FIELD_MULTIVALUED)
+        {
+            $value = array_shift($value);
+        }
     }
 
-    public function addAtribute($name)
-    {
-        $this->attributes[] = $name;
-    }
 }
