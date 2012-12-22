@@ -73,7 +73,7 @@ class Connection
 
         if (!@ldap_bind($this->handler, $this->login, $this->password))
         {
-            throw new LdapException(sprintf("Could not bind to LDAP with login='%s'.", $this->login, $this->handler, $this->error));
+            throw new LdapException(sprintf("Could not bind to LDAP with login='%s'.", $this->login), $this->handler, $this->error);
         }
     }
 
