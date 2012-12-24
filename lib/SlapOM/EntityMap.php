@@ -12,7 +12,7 @@ abstract class EntityMap
     protected $base_dn;
     protected $ldap_object_class;
     protected $entity_class;
-    protected $attributes = array('dn');
+    protected $attributes = array('dn' => 0);
 
     public final function __construct(\SlapOM\Connection $connection)
     {
@@ -43,11 +43,19 @@ abstract class EntityMap
 
     abstract protected function configure();
 
-    public function find($filter, $dn_suffix = null, $limit = 0)
+    public function find($filter = null, $dn_suffix = null, $limit = 0)
     {
         $dn = is_null($dn_suffix) ? $this->base_dn : $dn_suffix.",".$this->base_dn;
-        $filter = sprintf("(&(objectClass=%s)%s)", $this->ldap_object_class, $filter);
-
+        
+        if (is_null($filter))
+        {
+            $filter = sprintf("(&(objectClass=%s))", $this->ldap_object_class, $filter);
+        }
+        else
+        {
+            $filter = sprintf("(&(objectClass=%s)%s)", $this->ldap_object_class, $filter);
+        }
+        
         $results = $this->connection->search($dn, $filter, $this->getAttributeNames(), $limit);
 
         return $this->processResults($results);

@@ -1,7 +1,6 @@
 <?php
 namespace SlapOM;
 
-use SlapOM\Exception\SlapOM as SlapOMException;
 use SlapOM\Exception\Ldap as LdapException;
 
 class Connection
@@ -43,7 +42,7 @@ class Connection
 
     public function search($dn, $filter, $attributes, $limit = 0)
     {
-        $ret = ldap_search($this->getHandler(), $dn, $filter, $attributes, 0, $limit);
+        $ret = @ldap_search($this->getHandler(), $dn, $filter, $attributes, 0, $limit);
 
         if ($ret === false)
         {
@@ -62,18 +61,13 @@ class Connection
     {
         $this->handler = ldap_connect($this->host, $this->port);
 
-        if (!$this->isOpen()) 
-        {
-            throw new SlapOMException(sprintf("Could not open LDAP connection on host='%s' (port='%d').", $this->host, $this->port));
-        }
-
         ldap_get_option($this->handler,LDAP_OPT_ERROR_STRING,$this->error);
         ldap_set_option($this->handler, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($this->handler, LDAP_OPT_REFERRALS, 0);
 
         if (!@ldap_bind($this->handler, $this->login, $this->password))
         {
-            throw new LdapException(sprintf("Could not bind to LDAP with login='%s'.", $this->login), $this->handler, $this->error);
+            throw new LdapException(sprintf("Could not bind to LDAP host='%s:%s' with login='%s'.", $this->host, $this->port, $this->login), $this->handler, $this->error);
         }
     }
 
