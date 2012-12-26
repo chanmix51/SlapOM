@@ -28,7 +28,7 @@ abstract class Entity extends \ArrayObject
 
     public function isModified()
     {
-        return (bool) $this->state & self::ENTITY_MODIFIED;
+        return (bool) ($this->state & self::ENTITY_MODIFIED);
     }
 
     public function persist()
@@ -38,12 +38,12 @@ abstract class Entity extends \ArrayObject
 
     public function isPersisted()
     {
-        $this->state = $this->state & self::ENTITY_PERSISTED;
+        return (bool) ($this->state & self::ENTITY_PERSISTED);
     }
 
     public function isNew()
     {
-        $this->state = $this->state & self::ENTITY_NEW;
+        return ($this->_getState() === self::ENTITY_NEW);
     }
 
 
