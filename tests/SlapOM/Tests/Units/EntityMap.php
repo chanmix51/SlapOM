@@ -13,7 +13,7 @@ class EntityMap extends atoum\test
 
     public function test__construct()
     {
-        $connection = new \SlapOM\Connection('localhost', 'cn=root', 'root');
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
 
         $this->assert
                 ->exception(function() use ($connection) {
@@ -46,7 +46,7 @@ class EntityMap extends atoum\test
 
     public function testFind()
     {
-        $connection = new \SlapOM\Connection('localhost', 'cn=root', 'root');
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
         $map = $connection->getMapFor('SlapOM\Tests\Units\UserForTest3');
 
         $result = $map->find();
@@ -90,7 +90,7 @@ class EntityMap extends atoum\test
 
     public function testGetAttributeNames()
     {
-        $connection = new \SlapOM\Connection('localhost', 'cn=root', 'root');
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
         $map = $connection->getMapFor('SlapOM\Tests\Units\UserForTest3');
 
         $this->assert
@@ -100,7 +100,7 @@ class EntityMap extends atoum\test
 
     public function testAddAttribute()
     {
-        $connection = new \SlapOM\Connection('localhost', 'cn=root', 'root');
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
         $map = $connection->getMapFor('SlapOM\Tests\Units\UserForTest3');
 
         $this->assert
@@ -116,7 +116,7 @@ class EntityMap extends atoum\test
 
     public function testGetAttributeModifiers()
     {
-        $connection = new \SlapOM\Connection('localhost', 'cn=root', 'root');
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
         $map = $connection->getMapFor('SlapOM\Tests\Units\UserForTest3');
 
         $this->assert
