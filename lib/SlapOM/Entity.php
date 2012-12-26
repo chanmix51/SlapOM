@@ -64,7 +64,8 @@ abstract class Entity extends \ArrayObject
         switch($operation)
         {
         case 'set':
-            return $this->offsetSet($attribute, $arguments[0]);
+            $this->offsetSet($attribute, $arguments[0]);
+            $this->modify();
         case 'get':
             return $this->offsetGet($attribute);
         case 'has':
