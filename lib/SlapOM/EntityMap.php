@@ -96,8 +96,6 @@ abstract class EntityMap
         $this->connection->modify($entity->getDn(), $entry);
 
         $entity->persist();
-
-        return $entity;
     }
 
     protected function processResults($results)

@@ -129,7 +129,7 @@ You can also specifie a filter. This can be done by setting the first parameter 
 To save a modification, just call the ``save()`` function of the mapper class and give it your modified object::
 
   $user->setMail('newMail@maildomain.net');
-  $user = $userMap->save($user);
+  $userMap->save($user);
 
 So now, the ``$user->isPersisted()`` function will return true.
 

@@ -142,8 +142,8 @@ class EntityMap extends atoum\test
 
         $newMail = sprintf("random.mail.%d@plop.org", rand(0, 1000));
 
-        $user->setMail($newMail);
-        $user = $map->save($user);
+        $user->setMail($newMail);     
+        $map->save($user);
 
         $this->assert
                 ->boolean($user->isPersisted())
