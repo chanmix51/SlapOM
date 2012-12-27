@@ -13,6 +13,7 @@ abstract class EntityMap
     protected $ldap_object_class;
     protected $entity_class;
     protected $attributes = array('dn' => 0);
+    protected $read_only_attributes = array('dn', 'objectclass');
 
     public final function __construct(\SlapOM\Connection $connection)
     {
@@ -46,7 +47,7 @@ abstract class EntityMap
     public function find($filter = null, $dn_suffix = null, $limit = 0)
     {
         $dn = is_null($dn_suffix) ? $this->base_dn : $dn_suffix.",".$this->base_dn;
-        
+
         if (is_null($filter))
         {
             $filter = sprintf("(&(objectClass=%s))", $this->ldap_object_class, $filter);
@@ -55,7 +56,7 @@ abstract class EntityMap
         {
             $filter = sprintf("(&(objectClass=%s)%s)", $this->ldap_object_class, $filter);
         }
-        
+
         $results = $this->connection->search($dn, $filter, $this->getAttributeNames(), $limit);
 
         return $this->processResults($results);
@@ -76,6 +77,27 @@ abstract class EntityMap
         return $this->attributes[$name];
     }
 
+    public function save(\SlapOM\Entity $entity)
+    {
+        if (false === isset($entity['dn']))
+        {
+            Throw new SlapOMException("This fonctionality is not yet implemented.");
+        }
+        
+        $entry = array();
+        
+        foreach ($this->getAttributeNames() as $attr)
+        {
+            if (false === in_array($attr, $this->read_only_attributes))
+            {
+                $entry[$attr] = $entity[$attr];
+            }
+        }
+        $this->connection->modify($entity->getDn(), $entry);
+
+        $entity->persist();
+    }
+
     protected function processResults($results)
     {
         $entity_class = $this->entity_class;
@@ -87,7 +109,6 @@ abstract class EntityMap
             // iterate on results
             foreach ($results as $result)
             {
-                $result = array_filter($result, function($val) { return is_array($val); });
                 array_walk($result, array($this, 'processFieldValue'));
 
                 $entities[] = new $entity_class($result);
@@ -99,11 +120,14 @@ abstract class EntityMap
 
     protected function processFieldValue(&$value, $field)
     {
-        unset($value['count']);
-
-        if (!$this->getAttributeModifiers($field) & static::FIELD_MULTIVALUED)
+        if (is_array($value))
         {
-            $value = array_shift($value);
+            unset($value['count']);
+
+            if (!$this->getAttributeModifiers($field) & static::FIELD_MULTIVALUED)
+            {
+                $value = array_shift($value);
+            }
         }
     }
 

@@ -51,7 +51,19 @@ class Connection
 
         return ldap_get_entries($this->handler, $ret);
     }
-
+    
+    public function modify($dn, $entry)
+    {
+        $ret = @ldap_modify($this->getHandler(), $dn, $entry);
+        
+        if ($ret === false)
+        {
+            throw new LdapException(sprintf("Error while modifying dn '%s'.", $dn), $this->handler, $this->error);
+        }
+        
+        return true;
+    }
+    
     protected function isOpen()
     {
         return !(is_null($this->handler) or $this->handler === false);
