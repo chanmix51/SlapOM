@@ -69,6 +69,18 @@ class Entity extends atoum\test
         $this->assert
                 ->boolean($user->isModified())
                 ->isTrue();
+        
+        $user = new UserForTest2();
+        
+        $this->assert
+                ->boolean($user->isModified())
+                ->isFalse();
+        
+        $user->setWhatever(true);
+        
+        $this->assert
+                ->boolean($user->isModified())
+                ->isTrue();
     }
 
     public function testPersist()

@@ -76,13 +76,13 @@ class EntityMap extends atoum\test
         $this->assert
                 ->integer(count($result))
                 ->isEqualTo(10);
-        
+
         $result = $map->find('(uid=user.0)');
-        
+
         $this->assert
                 ->integer(count($result))
                 ->isEqualTo(1);
-        
+
         $this->assert
                 ->array($result[0]['objectclass'])
                 ->hasSize(4);
@@ -126,6 +126,47 @@ class EntityMap extends atoum\test
         $this->assert
                 ->integer($map->getAttributeModifiers('objectclass'))
                 ->isEqualTo(\SlapOM\EntityMap::FIELD_MULTIVALUED);
+    }
+
+    public function testSave()
+    {
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
+        $map = $connection->getMapFor('SlapOM\Tests\Units\UserForTest3');
+
+        $result = $map->find('(uid=user.1999)');
+        $user = $result[0];
+
+        $this->assert
+                ->boolean($user->isPersisted())
+                ->isFalse();
+
+        $newMail = sprintf("random.mail.%d@plop.org", rand(0, 1000));
+
+        $user->setMail($newMail);     
+        $map->save($user);
+
+        $this->assert
+                ->boolean($user->isPersisted())
+                ->isTrue();
+
+        $result = $map->find('(uid=user.1999)');
+        $user = $result[0];
+
+        $this->assert
+                ->boolean($user->isPersisted())
+                ->isFalse();
+
+        $this->assert
+                ->string($user->getMail())
+                ->isEqualTo($newMail);
+
+        $this->assert
+                ->exception(function() use ($map) {
+                            $user = new UserForTest3();
+                            $map->save($user);
+                        })
+                ->isInstanceOf('\SlapOM\Exception\SlapOM')
+                ->hasMessage('This fonctionality is not yet implemented.');
     }
 
 }
@@ -188,8 +229,8 @@ class UserForTest3Map extends \SlapOM\EntityMap
         $this->entity_class = 'SlapOM\Tests\Units\UserForTest3';
         $this->addAttribute('cn');
         $this->addAttribute('l');
+        $this->addAttribute('mail');
         $this->addAttribute('objectclass', \SlapOM\EntityMap::FIELD_MULTIVALUED);
-        $this->addAttribute('testBinary', \SlapOM\EntityMap::FIELD_BINARY);
     }
 
 }

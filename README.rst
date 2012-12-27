@@ -126,6 +126,13 @@ You can also specifie a filter. This can be done by setting the first parameter 
 
   $result = $userMap->find('(firstname=Amar)');
 
+To save a modification, just call the ``save()`` function of the mapper class and give it your modified object::
+
+  $user->setMail('newMail@maildomain.net');
+  $userMap->save($user);
+
+So now, the ``$user->isPersisted()`` function will return true.
+
 Tests
 *******
 The entire SlapOM library is unit tested with **Atoum** (http://downloads.atoum.org/). You can run the test suite with the command::
