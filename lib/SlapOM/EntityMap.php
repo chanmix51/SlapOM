@@ -83,9 +83,9 @@ abstract class EntityMap
         {
             Throw new SlapOMException("This fonctionality is not yet implemented.");
         }
-        
+
         $entry = array();
-        
+
         foreach ($this->getAttributeNames() as $attr)
         {
             if (false === in_array($attr, $this->read_only_attributes))
@@ -109,26 +109,30 @@ abstract class EntityMap
             // iterate on results
             foreach ($results as $result)
             {
-                array_walk($result, array($this, 'processFieldValue'));
+                $array = array();
+                foreach($result as $key => $value)
+                {
+                    if (is_array($value))
+                    {
+                        unset($value['count']);
 
-                $entities[] = new $entity_class($result);
+                        if (!$this->getAttributeModifiers($key) & static::FIELD_MULTIVALUED)
+                        {
+                            $value = utf8_encode(array_shift($value));
+                        }
+                        else
+                        {
+                            array_walk($value, function($val) { return utf8_encode($val); });
+                        }
+
+                        $array[$key] = $value;
+                    }
+                }
+                $entities[] = new $entity_class($array);
             }
+
         }
 
         return new \ArrayIterator($entities);
     }
-
-    protected function processFieldValue(&$value, $field)
-    {
-        if (is_array($value))
-        {
-            unset($value['count']);
-
-            if (!$this->getAttributeModifiers($field) & static::FIELD_MULTIVALUED)
-            {
-                $value = array_shift($value);
-            }
-        }
-    }
-
 }
