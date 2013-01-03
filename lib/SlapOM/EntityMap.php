@@ -63,6 +63,18 @@ abstract class EntityMap
         return $this->processResults($results);
     }
 
+    public function fetch($dn)
+    {
+        if (strpos($dn, $this->base_dn) === false)
+        {
+            throw new SlapOMException(sprintf("Given dn='%s' is not compatible with class base db '%s'.", $dn, $this->base_dn));
+        }
+
+        $filter = sprintf("(objectClass=%s)", $this->ldap_object_class);
+
+        return $this->processResults($this->connection->search($dn, $filter, $this->getAttributeNames()));
+    }
+
     public function getAttributeNames()
     {
         return array_keys($this->attributes);
@@ -117,13 +129,13 @@ abstract class EntityMap
                     {
                         unset($value['count']);
 
-                        if (!($this->getAttributeModifiers($key) & self::FIELD_MULTIVALUED))
+                        if ($this->getAttributeModifiers($key) & self::FIELD_MULTIVALUED)
                         {
-                            $value = utf8_encode(array_shift($value));
+                            array_walk($value, function($val) { return utf8_encode($val); });
                         }
                         else
                         {
-                            array_walk($value, function($val) { return utf8_encode($val); });
+                            $value = utf8_encode(array_shift($value));
                         }
 
                         $array[$key] = $value;
