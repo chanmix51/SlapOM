@@ -12,12 +12,13 @@ abstract class EntityMap
     protected $base_dn;
     protected $ldap_object_class;
     protected $entity_class;
-    protected $attributes = array('dn' => 0);
+    protected $attributes;
     protected $read_only_attributes = array('dn', 'objectclass');
 
     public final function __construct(\SlapOM\Connection $connection)
     {
         $this->connection = $connection;
+        $this->attributes =  array('dn' => 0);
         $this->configure();
 
         if (!isset($this->base_dn))
@@ -116,7 +117,7 @@ abstract class EntityMap
                     {
                         unset($value['count']);
 
-                        if (!$this->getAttributeModifiers($key) & static::FIELD_MULTIVALUED)
+                        if (!($this->getAttributeModifiers($key) & self::FIELD_MULTIVALUED))
                         {
                             $value = utf8_encode(array_shift($value));
                         }
@@ -126,6 +127,10 @@ abstract class EntityMap
                         }
 
                         $array[$key] = $value;
+                    }
+                    elseif ($key === "dn")
+                    {
+                        $array["dn"] = $value;
                     }
                 }
                 $entities[] = new $entity_class($array);
