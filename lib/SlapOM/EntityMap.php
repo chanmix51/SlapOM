@@ -45,36 +45,37 @@ abstract class EntityMap
 
     abstract protected function configure();
 
+    public function createObject(Array $values)
+    {
+        $class_name = $this->entity_class;
+
+        return new $class_name($values);
+    }
+
     public function find($filter = null, $dn_suffix = null, $limit = 0)
     {
         $dn = is_null($dn_suffix) ? $this->base_dn : $dn_suffix.",".$this->base_dn;
 
         if (is_null($filter))
         {
-            $filter = sprintf("(&(objectClass=%s))", $this->ldap_object_class, $filter);
+            $filter = $this->getObjectClassFilter();
         }
         else
         {
-            $filter = sprintf("(&(objectClass=%s)%s)", $this->ldap_object_class, $filter);
+            $filter = sprintf("(&%s%s)", $this->getObjectClassFilter(), $filter);
         }
 
-        $results = $this->connection->search($dn, $filter, $this->getAttributeNames(), $limit);
+        $collection = $this->connection->search($this, $dn, $filter, $this->getAttributeNames(), $limit);
 
-        return $this->processResults($results);
+        return $collection;
     }
 
     public function fetch($dn)
     {
-        if (strpos($dn, $this->base_dn) === false)
-        {
-            throw new SlapOMException(sprintf("Given dn='%s' is not compatible with class base db '%s'.", $dn, $this->base_dn));
-        }
+        $this->checkDn($dn);
+        $collection = $this->connection->search($this, $dn, $this->getObjectClassFilter(), $this->getAttributeNames());
 
-        $filter = sprintf("(objectClass=%s)", $this->ldap_object_class);
-
-        $result = $this->processResults($this->connection->search($dn, $filter, $this->getAttributeNames()));
-
-        return $result instanceof \ArrayIterator ? $result->current() : false;
+        return $collection->current();
     }
 
     public function getAttributeNames()
@@ -89,7 +90,7 @@ abstract class EntityMap
 
     public function getAttributeModifiers($name)
     {
-        return $this->attributes[$name];
+        return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
     }
 
     public function save(\SlapOM\Entity $entity)
@@ -113,45 +114,16 @@ abstract class EntityMap
         $entity->persist();
     }
 
-    protected function processResults($results)
+    protected function getObjectClassFilter()
     {
-        $entity_class = $this->entity_class;
-        $entities = array();
+      return sprintf("(objectClass=%s)", $this->ldap_object_class);
+    }
 
-        if ($results['count'] > 0)
+    public function checkDn($dn)
+    {
+        if (strpos($dn, $this->base_dn) === false)
         {
-            unset($results['count']);
-            // iterate on results
-            foreach ($results as $result)
-            {
-                $array = array();
-                foreach($result as $key => $value)
-                {
-                    if (is_array($value))
-                    {
-                        unset($value['count']);
-
-                        if ($this->getAttributeModifiers(strpos($key, ';') === false ? $key : substr($key, 0, strpos($key, ';'))) & self::FIELD_MULTIVALUED)
-                        {
-                            array_walk($value, function($val) { return utf8_encode($val); });
-                        }
-                        else
-                        {
-                            $value = utf8_encode(array_shift($value));
-                        }
-
-                        $array[$key] = $value;
-                    }
-                    elseif ($key === "dn")
-                    {
-                        $array["dn"] = $value;
-                    }
-                }
-                $entities[] = new $entity_class(array_merge(array_fill_keys(array_keys($this->attributes), null), $array));
-            }
-
+            throw new SlapOMException(sprintf("Given dn='%s' is not compatible with class base db '%s'.", $dn, $this->base_dn));
         }
-
-        return new \ArrayIterator($entities);
     }
 }

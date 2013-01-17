@@ -40,7 +40,7 @@ class Connection
         return $this->maps[$class];
     }
 
-    public function search($dn, $filter, $attributes, $limit = 0)
+    public function search(EntityMap $map, $dn, $filter, $attributes, $limit = 0)
     {
         $ret = @ldap_search($this->getHandler(), $dn, $filter, $attributes, 0, $limit);
 
@@ -49,7 +49,7 @@ class Connection
             throw new LdapException(sprintf("Error while filtering dn '%s' with filter '%s'.", $dn, $filter), $this->handler, $this->error);
         }
 
-        return ldap_get_entries($this->handler, $ret);
+        return new Collection($this->handler, $ret, $map);
     }
 
     public function modify($dn, $entry)
