@@ -72,7 +72,9 @@ abstract class EntityMap
 
         $filter = sprintf("(objectClass=%s)", $this->ldap_object_class);
 
-        return $this->processResults($this->connection->search($dn, $filter, $this->getAttributeNames()));
+        $result = $this->processResults($this->connection->search($dn, $filter, $this->getAttributeNames()));
+
+        return $result instanceof \ArrayIterator ? $result->current() : false;
     }
 
     public function getAttributeNames()
@@ -129,7 +131,7 @@ abstract class EntityMap
                     {
                         unset($value['count']);
 
-                        if ($this->getAttributeModifiers($key) & self::FIELD_MULTIVALUED)
+                        if ($this->getAttributeModifiers(strpos($key, ';') === false ? $key : substr($key, 0, strpos($key, ';'))) & self::FIELD_MULTIVALUED)
                         {
                             array_walk($value, function($val) { return utf8_encode($val); });
                         }
@@ -145,7 +147,7 @@ abstract class EntityMap
                         $array["dn"] = $value;
                     }
                 }
-                $entities[] = new $entity_class($array);
+                $entities[] = new $entity_class(array_merge(array_fill_keys(array_keys($this->attributes), null), $array));
             }
 
         }

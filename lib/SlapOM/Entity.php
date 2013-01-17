@@ -70,7 +70,7 @@ abstract class Entity implements \ArrayAccess
 
     public function has($name)
     {
-        return isset($this->values[$name]);
+        return array_key_exists($name, $this->values);
     }
 
     public function clear($name)
