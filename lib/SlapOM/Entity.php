@@ -53,10 +53,15 @@ abstract class Entity implements \ArrayAccess
     }
 
 
-    public function get($name)
+    public function get($name, $default = null)
     {
         if (!$this->has($name))
         {
+            if (!is_null($default))
+            {
+                return $default;
+            }
+
             throw new SlapOMException(sprintf("Could not GET non existant field '%s'.", $name));
         }
 
