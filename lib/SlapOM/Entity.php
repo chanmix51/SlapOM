@@ -108,7 +108,7 @@ abstract class Entity implements \ArrayAccess
             $this->set($attribute, $arguments[0]);
             $this->modify();
         case 'get':
-            return $this->get($attribute);
+            return isset($arguments[0]) ? $this->get($attribute, $arguments[0]) : $this->get($attribute);
         case 'has':
             return $this->has($attribute);
         case 'clear':
