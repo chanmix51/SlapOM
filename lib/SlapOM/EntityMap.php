@@ -93,24 +93,23 @@ abstract class EntityMap
         return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
     }
 
-    public function save(\SlapOM\Entity $entity)
+    public function save(\SlapOM\Entity $entity, Array $attributes = null)
     {
         if (false === isset($entity['dn']))
         {
-            Throw new SlapOMException("This fonctionality is not yet implemented.");
+            Throw new SlapOMException("The create feature is not yet implemented.");
         }
 
+        $attributes = is_null($attributes) ? $this->getAttributeNames() : array_intersect($this->getAttributeNames(), $attributes);
+        $attributes = array_diff($attributes, $this->read_only_attributes);
         $entry = array();
 
-        foreach ($this->getAttributeNames() as $attr)
+        foreach ($attributes as $attr)
         {
-            if (false === in_array($attr, $this->read_only_attributes))
-            {
-                $entry[$attr] = $entity[$attr];
-            }
+            $entry[$attr] = $entity[$attr];
         }
-        $this->connection->modify($entity->getDn(), $entry);
 
+        $this->connection->modify($entity->getDn(), $entry);
         $entity->persist();
     }
 
