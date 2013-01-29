@@ -54,11 +54,43 @@ class Connection
 
     public function modify($dn, $entry)
     {
-        $ret = @ldap_modify($this->getHandler(), $dn, $entry);
-
-        if ($ret === false)
+        $del_attr = array();
+        $mod_attr = array();
+        foreach ($entry as $name => $value)
         {
-            throw new LdapException(sprintf("Error while modifying dn '%s'.", $dn), $this->handler, $this->error);
+            if (empty($value))
+            {
+                $del_attr[$name] = array();
+            }
+            else
+            {
+                if (is_array($value))
+                {
+                    $mod_attr[$name] = $value;
+                }
+                else
+                {
+                    $mod_attr[$name] = array($value);
+                }
+            }
+        }
+
+        if (count($del_attr) > 0)
+        {
+            $ret = @ldap_mod_del($this->getHandler(), $dn, $del_attr);
+            if ($ret === false)
+            {
+                throw new LdapException(sprintf("Error while DELETING attributes {%s} in dn='%s'.", join(', ', $del_attr), $dn), $this->handler, $this->error);
+            }
+        }
+
+        if (count($mod_attr) > 0)
+        {
+            $ret = @ldap_mod_replace($this->getHandler(), $dn, $mod_attr);
+            if ($ret === false)
+            {
+                throw new LdapException(sprintf("Error while MODIFYING values {%s} in dn='%s'.", join(', ', $mod_attr), $dn), $this->handler, $this->error);
+            }
         }
 
         return true;
