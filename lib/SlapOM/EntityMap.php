@@ -13,7 +13,7 @@ abstract class EntityMap
     protected $ldap_object_class;
     protected $entity_class;
     protected $attributes;
-    protected $read_only_attributes = array('dn', 'objectclass');
+    protected $read_only_attributes = array('dn', 'objectClass');
 
     public final function __construct(\SlapOM\Connection $connection)
     {

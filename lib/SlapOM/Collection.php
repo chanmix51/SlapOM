@@ -103,7 +103,6 @@ class Collection implements \Iterator, \Countable
         $fields = ldap_get_attributes($this->handler, $ldap_entry);
         unset($fields['count']);
         $fields = array_filter($fields, function($val) { return (!is_array($val) and $val !== "count"); });
-        $fields = array_map(function($val) { return strtolower($val); }, $fields);
 
         return $fields;
     }
