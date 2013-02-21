@@ -58,7 +58,8 @@ class Collection implements \Iterator, \Countable
      * Structure information is melt with data, all functions need a 
      * connection handler, there are 367 ways of doing the things but only one 
      * works (at least with binary results) without failures nor error 
-     * messages. Result keys change with automatic pagination without notice. 
+     * messages. Result keys change with automatic pagination without notice 
+     * and so does values when they have accentuated characters. 
      * It has been a hell to debug, thanks to the obsolutely non informative 
      * error messages. PURE CRAP !!
      **/
@@ -85,11 +86,25 @@ class Collection implements \Iterator, \Countable
                 if ($this->map->getAttributeModifiers($attribute) & EntityMap::FIELD_MULTIVALUED)
                 {
                     unset($value['count']);
-                    $values[$attribute] = $value;
+                    if (!$this->map->getAttributeModifiers($attribute) & EntityMap::FIELD_BINARY)
+                    {
+                        $values[$attribute] = array_map(function($val) { if ($val === base64_encode(base64_decode($val, true))) { return base64_decode($val); } return $val; }, $value);
+                    }
+                    else
+                    {
+                        $values[$attribute] = $value;
+                    }
                 }
                 else
                 {
-                    $values[$attribute] = $value[0];
+                    if ($value[0] === base64_encode(base64_decode($value[0], true)))
+                    {
+                        $values[$attribute] = $value[0];
+                    }
+                    else
+                    {
+                        $values[$attribute] = $value[0];
+                    }
                 }
             }
         }

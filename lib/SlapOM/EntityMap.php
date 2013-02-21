@@ -65,7 +65,7 @@ abstract class EntityMap
             $filter = sprintf("(&%s%s)", $this->getObjectClassFilter(), $filter);
         }
 
-        $collection = $this->connection->search($this, $dn, $filter, $this->getAttributeNames(), $limit);
+        $collection = $this->connection->search($this, $dn, $filter, $this->getSearchFields(), $limit);
 
         return $collection;
     }
@@ -73,7 +73,7 @@ abstract class EntityMap
     public function fetch($dn)
     {
         $this->checkDn($dn);
-        $collection = $this->connection->search($this, $dn, $this->getObjectClassFilter(), $this->getAttributeNames());
+        $collection = $this->connection->search($this, $dn, $this->getObjectClassFilter(), $this->getSearchFields());
 
         return $collection->current();
     }
@@ -113,12 +113,17 @@ abstract class EntityMap
         $entity->persist();
     }
 
+    public function getSearchFields()
+    {
+        return $this->getAttributeNames();
+    }
+
     protected function getObjectClassFilter()
     {
       return sprintf("(objectClass=%s)", $this->ldap_object_class);
     }
 
-    public function checkDn($dn)
+    protected function checkDn($dn)
     {
         if (strpos($dn, $this->base_dn) === false)
         {
