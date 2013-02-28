@@ -71,6 +71,7 @@ abstract class Entity implements \ArrayAccess
     public function set($name, $attribute)
     {
         $this->values[$name] = $attribute;
+        $this->modify();
     }
 
     public function has($name)
@@ -86,6 +87,43 @@ abstract class Entity implements \ArrayAccess
         }
 
         unset($this->values[$name]);
+        $this->modify();
+    }
+
+    public function add($name, $value)
+    {
+        if ($this->has($name))
+        {
+           if ( !is_array($this->values[$name]))
+           {
+               throw new SlapOMException(sprintf("Field '%s' already exists and is not an array.", $name));
+           }
+
+           $this->values[$name][] = $value;
+        }
+        else
+        {
+            $this->values[$name] = array($value);
+        }
+
+        $this->modify();
+    }
+
+    public function remove($field, $key)
+    {
+        if (!$this->has($field) or !is_array($this->values[$field]))
+        {
+            throw new SlapOMException(sprintf("Field '%s' does not exist or is not an array.", $field));
+        }
+
+        if (!array_key_exists($key, $this->values[$field]))
+        {
+            throw new SlapOMException(sprintf("Key '%s' does not exist in array field '%s'.", $key, $field));
+        }
+
+        unset($this->values[$field][$key]);
+        $this->values[$field] = array_values($this->values[$field]);
+        $this->modify();
     }
 
     /**
@@ -106,13 +144,19 @@ abstract class Entity implements \ArrayAccess
         {
         case 'set':
             $this->set($attribute, $arguments[0]);
-            $this->modify();
+            break;
         case 'get':
             return isset($arguments[0]) ? $this->get($attribute, $arguments[0]) : $this->get($attribute);
         case 'has':
             return $this->has($attribute);
         case 'clear':
             return parent::offsetUnset($attribute);
+        case 'add':
+            $this->add($attribute, $arguments[0]);
+            break;
+        case 'remove':
+            $this->remove($attribute, $arguments[0]);
+            break;
         default:
             throw new SlapOMException(sprintf('No such method "%s:%s()"', get_class($this), $method));
         }

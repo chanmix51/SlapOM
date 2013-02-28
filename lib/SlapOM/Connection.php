@@ -89,7 +89,7 @@ class Connection
             $ret = @ldap_mod_replace($this->getHandler(), $dn, $mod_attr);
             if ($ret === false)
             {
-                throw new LdapException(sprintf("Error while MODIFYING values {%s} in dn='%s'.", join(', ', $mod_attr), $dn), $this->handler, $this->error);
+                throw new LdapException(sprintf("Error while MODIFYING values <pre>%s</pre> in dn='%s'.", print_r($mod_attr, true), $dn), $this->handler, $this->error);
             }
         }
 
