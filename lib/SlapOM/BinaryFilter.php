@@ -84,7 +84,7 @@ class BinaryFilter
         }
         elseif ($this->isPartial())
         {
-            return sprintf("(%s)", $this->right->__toString());
+            return sprintf("(%s)", is_object($this->right) ? $this->right->__toString() :  $this->right);
         }
         else
         {
