@@ -70,10 +70,11 @@ abstract class EntityMap
         return $collection;
     }
 
-    public function fetch($dn)
+    public function fetch($dn, Array $attributes = null)
     {
         $this->checkDn($dn);
-        $collection = $this->connection->search($this, $dn, $this->getObjectClassFilter(), $this->getSearchFields());
+        $collection = $this->connection
+            ->search($this, $dn, $this->getObjectClassFilter(), is_null($attributes) ? $this->getSearchFields() : $attributes);
 
         return $collection->current();
     }
