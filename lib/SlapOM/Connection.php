@@ -12,6 +12,7 @@ class Connection
     protected $password;
     protected $maps = array();
     protected $error;
+    protected $logger;
 
     public function __construct($host, $login, $password = null, $port = 389)
     {
@@ -29,12 +30,31 @@ class Connection
         }
     }
 
+    public function addLogger(\SlapOM\LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    public function removeLogger()
+    {
+        $this->logger = null;
+    }
+
+    protected function log($message, $loglevel = LoggerInterface::LOGLEVEL_DEBUG)
+    {
+        if (!is_null($this->logger))
+        {
+            $this->logger->log($message, $loglevel);
+        }
+    }
+
     public function getMapFor($class, $renew = false)
     {
         $class = trim($class, '\\');
         if (!isset($this->maps[$class]) or $renew === true)
         {
             $class_name = sprintf("%sMap", $class);
+            $this->log(sprintf("Spawning a new instance of '%s'.", $class_name));
             $this->maps[$class] = new $class_name($this);
         }
 
@@ -43,6 +63,7 @@ class Connection
 
     public function search(EntityMap $map, $dn, $filter, $attributes, $limit = 0)
     {
+        $this->log(sprintf("SEARCH Class='%s'. DN='%s', filter='%s', attributes={%s}, limit=%d.", get_class($map), $dn, $filter, join(', ', $attributes), $limit));
         $ret = @ldap_search($this->getHandler(), $dn, $filter, $attributes, 0, $limit);
 
         if ($ret === false)
@@ -50,11 +71,14 @@ class Connection
             throw new LdapException(sprintf("Error while filtering dn '%s' with filter '%s'.", $dn, $filter), $this->handler, $this->error);
         }
 
+        $this->log(sprintf("Query returned '%d' results.", $ret['count']));
+
         return new Collection($this->handler, $ret, $map);
     }
 
     public function modify($dn, $entry)
     {
+        $this->log(sprintf("MODIFY dn='%s'.", $dn));
         $del_attr = array();
         $mod_attr = array();
         foreach ($entry as $name => $value)
@@ -83,6 +107,7 @@ class Connection
             {
                 throw new LdapException(sprintf("Error while DELETING attributes {%s} in dn='%s'.", join(', ', $del_attr), $dn), $this->handler, $this->error);
             }
+            $this->log(sprintf("Removing attribute '%s'.", $del_attr));
         }
 
         if (count($mod_attr) > 0)
@@ -92,6 +117,8 @@ class Connection
             {
                 throw new LdapException(sprintf("Error while MODIFYING values <pre>%s</pre> in dn='%s'.", print_r($mod_attr, true), $dn), $this->handler, $this->error);
             }
+
+            $this->log(sprintf("Changing attribute {%s}.", join(', ', array_keys($del_attr))));
         }
 
         return true;
@@ -114,6 +141,8 @@ class Connection
         {
             throw new LdapException(sprintf("Could not bind to LDAP host='%s:%s' with login='%s'.", $this->host, $this->port, $this->login), $this->handler, $this->error);
         }
+
+        $this->log(sprintf("Connected to LDAP host='%s:%s' with login = '%s'.", $this->host, $this->port, $this->login));
     }
 
     protected function getHandler()
