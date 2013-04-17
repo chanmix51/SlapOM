@@ -50,7 +50,7 @@ class Connection
 
     public function getMapFor($class, $renew = false)
     {
-        $class = trim($class, '\\');
+        $class = ltrim($class, '\\');
         if (!isset($this->maps[$class]) or $renew === true)
         {
             $class_name = sprintf("%sMap", $class);
