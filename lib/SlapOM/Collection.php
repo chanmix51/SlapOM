@@ -1,6 +1,8 @@
 <?php
 namespace SlapOM;
 
+use \SlapOM\Exception\Ldap as LdapException;
+
 class Collection implements \Iterator, \Countable
 {
     protected $map;
@@ -14,6 +16,16 @@ class Collection implements \Iterator, \Countable
         $this->handler = $handler;
         $this->result = $result;
         $this->map = $map;
+    }
+
+    public function sort($key)
+    {
+        if (ldap_sort($this->handler, $this->result, $key) === false)
+        {
+            throw new LdapException(sprintf("Error while sorting results on key '%s'.", $key), $this->handler);
+        }
+
+        return $this;
     }
 
     public function rewind()
