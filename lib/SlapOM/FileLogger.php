@@ -41,7 +41,7 @@ class FileLogger implements LoggerInterface
     {
         if ($this->level & $loglevel)
         {
-            if (@fwrite($this->handler, sprintf("%08f |%s=> %s\n", microtime(true), str_repeat(' ', $loglevel), $message)) === false)
+            if (@fwrite($this->handler, sprintf("%26s |%s=> %s\n", date('Y-m-d H:i:s', microtime(true)), str_repeat(' ', $loglevel), $message)) === false)
             {
                 throw new \Exception(sprintf("Could not write message to file."));
             }
