@@ -133,4 +133,18 @@ class Collection implements \Iterator, \Countable
 
         return $fields;
     }
+
+    public function export()
+    {
+        $this->rewind();
+
+        $results = array();
+        while ($this->valid())
+        {
+            $results[] = $this->current();
+            $this->next();
+        }
+
+        return $results;
+    }
 }
