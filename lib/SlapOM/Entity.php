@@ -62,7 +62,7 @@ abstract class Entity implements \ArrayAccess
                 return $default;
             }
 
-            throw new SlapOMException(sprintf("Could not GET non existant field '%s'.\nAvailable fields={%s}.", $name, join(', ', array_map(function ($val) { return sprintf('"%s"', $val); }, array_keys($this->values)))));
+            throw new SlapOMException(sprintf("Could not GET non existant field '%s' in entity '%s'.\nAvailable fields={%s}.", $name, get_class($this), join(', ', array_map(function ($val) { return sprintf('"%s"', $val); }, array_keys($this->values)))));
         }
 
         return $this->values[$name];
