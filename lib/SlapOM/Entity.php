@@ -116,7 +116,7 @@ abstract class Entity implements \ArrayAccess
             throw new SlapOMException(sprintf("Field '%s' does not exist or is not an array.", $field));
         }
 
-        if (!array_key_exists($key, $this->values[$field]))
+        if (!array_key_exists((string) $key, $this->values[$field]))
         {
             throw new SlapOMException(sprintf("Key '%s' does not exist in array field '%s'.", $key, $field));
         }
@@ -150,7 +150,8 @@ abstract class Entity implements \ArrayAccess
         case 'has':
             return $this->has($attribute);
         case 'clear':
-            return parent::offsetUnset($attribute);
+            $this->clear($attribute);
+            break;
         case 'add':
             $this->add($attribute, $arguments[0]);
             break;
