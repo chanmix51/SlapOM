@@ -131,4 +131,9 @@ abstract class EntityMap
             throw new SlapOMException(sprintf("Given dn='%s' is not compatible with class base db '%s'.", $dn, $this->base_dn));
         }
     }
+
+    public function getEntityClass()
+    {
+        return $this->entity_class;
+    }
 }
