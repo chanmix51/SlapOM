@@ -52,7 +52,7 @@ abstract class EntityMap
         return new $class_name($values);
     }
 
-    public function find($filter = null, $dn_suffix = null, $limit = 0)
+    public function find($filter = null, $dn_suffix = null, $limit = 0, Array $fields = null)
     {
         $dn = is_null($dn_suffix) ? $this->base_dn : $dn_suffix.",".$this->base_dn;
 
@@ -65,7 +65,7 @@ abstract class EntityMap
             $filter = sprintf("(&%s%s)", $this->getObjectClassFilter(), $filter);
         }
 
-        $collection = $this->connection->search($this, $dn, $filter, $this->getSearchFields(), $limit);
+        $collection = $this->connection->search($this, $dn, $filter, is_null($fields) ? $this->getSearchFields() : $fields, $limit);
 
         return $collection;
     }
