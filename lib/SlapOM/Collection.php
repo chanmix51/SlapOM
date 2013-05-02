@@ -134,14 +134,23 @@ class Collection implements \Iterator, \Countable
         return $fields;
     }
 
-    public function export()
+    public function export($filter = null)
     {
-        $this->rewind();
+        if (!is_null($filter) and !is_callable($filter))
+        {
+            throw new Exception(sprintf("Given filter must be a callable ('%s' given).", gettype($filter)));
+        }
 
+        $this->rewind();
         $results = array();
+
         while ($this->valid())
         {
-            $results[] = $this->current();
+            if (is_null($filter) or call_user_func_array($filter, array($this->current())) === true)
+            {
+                $results[] = $this->current();
+            }
+
             $this->next();
         }
 
