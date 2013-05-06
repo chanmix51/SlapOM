@@ -71,7 +71,7 @@ class Connection
             throw new LdapException(sprintf("Error while filtering dn '%s' with filter '%s'.", $dn, $filter), $this->handler, $this->error);
         }
 
-        $this->log(sprintf("Query returned '%d' results.", $ret['count']));
+        $this->log(sprintf("Query returned '%d' results.", ldap_count_entries($this->getHandler(), $ret)));
 
         return new Collection($this->handler, $ret, $map);
     }
