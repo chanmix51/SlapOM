@@ -105,7 +105,9 @@ class Connection
             $ret = @ldap_mod_del($this->getHandler(), $dn, $del_attr);
             if ($ret === false)
             {
-                throw new LdapException(sprintf("Error while DELETING attributes {%s} in dn='%s'.", join(', ', $del_attr), $dn), $this->handler, $this->error);
+                $this->log(sprintf("LDAP ERROR '%s' -- Deleting {%s}.", ldap_error($this->getHandler()), print_r($del_attr, true)), \SlapOM\LoggerInterface::LOGLEVEL_CRITICAL);
+
+                throw new LdapException(sprintf("Error while DELETING attributes {%s} in dn='%s'.", join(', ', $del_attr), $dn), $this->getHandler(), $this->error);
             }
             $this->log(sprintf("Removing attribute '%s'.", $del_attr));
         }
@@ -115,10 +117,12 @@ class Connection
             $ret = @ldap_mod_replace($this->getHandler(), $dn, $mod_attr);
             if ($ret === false)
             {
-                throw new LdapException(sprintf("Error while MODIFYING values <pre>%s</pre> in dn='%s'.", print_r($mod_attr, true), $dn), $this->handler, $this->error);
+                $this->log(sprintf("LDAP ERROR '%s' -- Modifying {%s}.", ldap_error($this->getHandler()), print_r($mod_attr, true)), \SlapOM\LoggerInterface::LOGLEVEL_CRITICAL);
+
+                throw new LdapException(sprintf("Error while MODIFYING values <pre>%s</pre> in dn='%s'.", print_r($mod_attr, true), $dn), $this->getHandler(), $this->error);
             }
 
-            $this->log(sprintf("Changing attribute {%s}.", join(', ', array_keys($del_attr))));
+            $this->log(sprintf("Changing attributes {%s} to {%s}.", join(', ', array_keys($mod_attr)), print_r($mod_attr, true)));
         }
 
         return true;

@@ -72,9 +72,16 @@ class Collection implements \Iterator, \Countable
      * works (at least with binary results) without failures nor error 
      * messages. Result keys change with automatic pagination without notice 
      * and so does values when they have accentuated characters. 
-     * It has been a hell to debug, thanks to the obsolutely non informative 
-     * error messages. PURE CRAP !!
-     **/
+     * It has been a pain to write and a hell to debug, thanks to the 
+     * obsolutely non informative documentation.
+     *
+     * hydrateFromResult
+     *
+     * Create an entity instance from a LDAP result.
+     *
+     * @param Resource $ldap_entry 
+     * @return Entity
+     */
     protected function hydrateFromResult($ldap_entry)
     {
         if ($ldap_entry === false) return false;
@@ -125,6 +132,14 @@ class Collection implements \Iterator, \Countable
         return $this->map->createObject($values);
     }
 
+    /**
+     * getAttributes
+     *
+     * Get and pre-process attributes from a LDAP result resource.
+     *
+     * @param Resource
+     * @return Array
+     */
     private function getAttributes($ldap_entry)
     {
         $fields = ldap_get_attributes($this->handler, $ldap_entry);
@@ -134,6 +149,14 @@ class Collection implements \Iterator, \Countable
         return $fields;
     }
 
+    /**
+     * export
+     *
+     * Export a collection as an array.
+     *
+     * @param Callable $filter (optionnal)
+     * @return Array
+     */
     public function export($filter = null)
     {
         if (!is_null($filter) and !is_callable($filter))
