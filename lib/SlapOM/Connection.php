@@ -69,11 +69,16 @@ class Connection
         if ($ret === false)
         {
             throw new LdapException(sprintf("Error while filtering dn '%s' with filter '%s'.", $dn, $filter), $this->handler, $this->error);
+        } 
+        elseif (is_null($ret))
+        {
+            throw new LdapException(sprintf("It looks like your query '%s' on base dn '%s' did not return a valid result resource. Double check it and look into the server's logs.", $filter, $dn), $this->handler, $this->error);
         }
 
-        $this->log(sprintf("Query returned '%d' results.", ldap_count_entries($this->getHandler(), $ret)));
+        $collection = new Collection($this->handler, $ret, $map);
+        $this->log(sprintf("Query returned '%d' results.", $collection->count()));
 
-        return new Collection($this->handler, $ret, $map);
+        return $collection;
     }
 
     public function modify($dn, $entry)
