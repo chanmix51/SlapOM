@@ -1,6 +1,8 @@
 <?php
 namespace SlapOM;
 
+use \SlapOM\Exception\SlapOM as Exception;
+
 class FileLogger implements LoggerInterface
 {
     protected $handler;
