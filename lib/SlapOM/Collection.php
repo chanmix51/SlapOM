@@ -105,7 +105,11 @@ class Collection implements \Iterator, \Countable
                 if ($this->map->getAttributeModifiers($attribute) & EntityMap::FIELD_MULTIVALUED)
                 {
                     unset($value['count']);
-                    if (!$this->map->getAttributeModifiers($attribute) & EntityMap::FIELD_BINARY)
+                    if ($this->map->getAttributeModifiers($attribute) & EntityMap::FIELD_DN)
+                    {
+                        $values[$attribute] = array_map(function($val) { return new DnType($val); }, $value);
+                    }
+                    elseif (!$this->map->getAttributeModifiers($attribute) & EntityMap::FIELD_BINARY)
                     {
                         $values[$attribute] = array_map(function($val) { if ($val === base64_encode(base64_decode($val, true))) { return base64_decode($val); } return $val; }, $value);
                     }
@@ -116,7 +120,11 @@ class Collection implements \Iterator, \Countable
                 }
                 else
                 {
-                    if ($value[0] === base64_encode(base64_decode($value[0], true)))
+                    if ($this->map->getAttributeModifiers($attribute) & EntityMap::FIELD_DN)
+                    {
+                        $values[$attribute] = new DnType($value);
+                    }
+                    elseif ($value[0] === base64_encode(base64_decode($value[0], true)))
                     {
                         $values[$attribute] = $value[0];
                     }
@@ -127,7 +135,7 @@ class Collection implements \Iterator, \Countable
                 }
             }
         }
-        $values['dn'] = ldap_get_dn($this->handler, $ldap_entry);
+        $values['dn'] = new DnType(ldap_get_dn($this->handler, $ldap_entry));
 
         return $this->map->createObject($values);
     }
