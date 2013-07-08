@@ -75,7 +75,7 @@ abstract class EntityMap
     {
         $this->checkDn($dn);
         $collection = $this->connection
-            ->search($this, (string) $dn, $this->getObjectClassFilter(), is_null($attributes) ? $this->getSearchFields() : $attributes);
+            ->search($this, $dn, $this->getObjectClassFilter(), is_null($attributes) ? $this->getSearchFields() : $attributes);
 
         return $collection->current();
     }
