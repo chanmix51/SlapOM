@@ -5,9 +5,8 @@ use SlapOM\Exception\SlapOM as SlapOMException;
 
 abstract class EntityMap
 {
-    const FIELD_DN = 1;
-    const FIELD_MULTIVALUED = 2;
-    const FIELD_BINARY      = 4;
+    const FIELD_MULTIVALUED = 1;
+    const FIELD_BINARY      = 2;
 
     protected $connection;
     protected $base_dn;
@@ -19,7 +18,7 @@ abstract class EntityMap
     public final function __construct(\SlapOM\Connection $connection)
     {
         $this->connection = $connection;
-        $this->attributes =  array('dn' => static::FIELD_DN);
+        $this->attributes =  array('dn' => 0);
         $this->configure();
 
         if (!isset($this->base_dn))
