@@ -2,9 +2,9 @@
 SlapOM Small Object Model Manager for LDAP
 ==========================================
 
-**SlapOM** is a simple object model manager for LDAP. It allow you to **generate**, **hydrate** objects from a database using the LDAP protocol. It has been tested with Microsoft Active Directory (tm).
+**SlapOM** is a simple object model manager for LDAP. It allows you to **generate** and **hydrate** objects from a database using the LDAP protocol. It has been tested with Microsoft Active Directory (tm).
 
-SlapOM works with PHP 5.3 and needs the php5-ldap extension module. It use LDAP v3.
+SlapOM works with PHP 5.3 and needs the php5-ldap extension module. It uses LDAP v3.
 
 Project structure
 *****************
@@ -28,15 +28,15 @@ Project structure
 Generation and hydration example
 ********************************
 
-Here is the scenario, you want to retrieve your "person" objectClass from the LDAP into a User class to display the user name, email and group informations.
+Here is the scenario: you want to retrieve your "person" objectClass from the LDAP server and make its fields available into a User PHP class to display the user name, email and group informations.
 
 Step 1 - Create the inherited objects
 =====================================
-So the first step is to create the object (=entity=User) that represent the "person" objectClass AND his mapper.
+The first step is to create the object (=entity=User) that will represent the "person" objectClass AND his mapper.
 
 Entity class (must extend \\SlapOM\\Entity)
 -------------------------------------------
-::
+.. code-block:: php
 
   public class User extends \SlapOM\Entity
   {
@@ -46,19 +46,19 @@ Mapper class (must extend \\SlapOM\\EntityMap and must be named "{Entity class n
 -----------------------------------------------------------------------------------------
 The abstract class EntityMap contains an abstract method configure(), you have to override this method to set up the required parameters.
 
-::
+.. code-block:: php
 
   public class UserMap extends \SlapOM\EntityMap
   {
 
       protected function configure()
       {
-          /* Sets up the required options */
+          /* Set up the required options */
           $this->base_dn = 'dc=company,dc=com'
           $this->ldap_object_class = 'person';
           $this->entity_class = 'User';
 
-          /* Sets up the fields that you want to retrieve in your User class */
+          /* Set up the fields that you want to retrieve in your User class */
           // Standard String fields
           $this->addAttribute('firstname');
           $this->addAttribute('lastname');
@@ -75,19 +75,27 @@ The abstract class EntityMap contains an abstract method configure(), you have t
 Step 2 - Use it !
 =================
 
-Initialize the connection::
+Initialize the connection:
+
+.. code-block:: php
 
   $connection = new SlapOM\Connection('localhost', 'cn=root', 'root');
 
-Instantiate the mapper class::
+Instantiate the mapper class:
+
+.. code-block:: php
 
   $userMap = $connection->getMapFor('User');
 
-Query all User entities in a $result array::
+Query all User entities in a $result array:
+
+.. code-block:: php
 
   $result = $userMap->find();
 
-Displays result::
+Display results:
+
+.. code-block:: php
 
   <ul> 
   <?php foreach ($result as $user): ?>
@@ -123,41 +131,51 @@ Displays result::
 Querying the database
 =====================
 
-Of course, most of the time, you are not interested int fetching all entities from the database but a certain set of them. This can be done by setting the first parameter of the ``find()`` method with a normalized LDAP filter string like::
+Of course, most of the time, you are not interested in fetching all entities from the database but only a subset of them. This can be done by setting the first parameter of the ``find()`` method with a normalized LDAP filter string such as:
+
+.. code-block:: php
 
   $result = $userMap->find('(|(mail=*@maildomain.net)(name=user*))');
 
-Note that the returning value of the ``getObjectClassFilter()`` method will be appended to you search string so the final search string will be ``(&(objectClass=user)(|(mail=*@maildomain.net)(name=user*)))``. 
+Note that the returning value of the ``getObjectClassFilter()`` method will be appended to you search string. The final search string will really be ``(&(objectClass=user)(|(mail=*@maildomain.net)(name=user*)))``. 
 
-To manage your complex queries, you might use the ``BinaryFilter`` class::
+To manage more complex queries, you might use the ``BinaryFilter`` class:
+
+.. code-block:: php
 
     $filter = \SlapOM\BinaryFilter::create("mail=*@maildomain.net")
         ->addOr("name=user*");
 
     $result = $userMap->find((string) $filter);
 
-In case you have the DN of a record, use the ``fetch()`` method to get the according object::
+In case you have the DN of a record, use the ``fetch()`` method to get the corresponding object:
+
+.. code-block:: php
 
     $user = $userMap->fetch($dn);
 
 Projection operator
 ===================
 
-By default, the queries return collections that pop hydrated objects. These instances are by default fed with the fields declared in their according map class but this behavior can be overloaded using the ``getSearchFields()`` method. Even though it is a good idea to declare the user password as a binary field in the user map class, it is by example not a good idea to fetch it from the database every time a user is retrieved. This method is the right place to strip (or add) fields from your searches.
+By default queries return collections that pop hydrated objects. These instances are by default fed with the fields declared in their according map class. This behavior can be overloaded using the ``getSearchFields()`` method. Even though it is a good idea to declare the user password as a binary field in the user map class, it would not a good idea to fetch it from the database every time a user is retrieved. This method is the right place to strip (or add) fields from your searches.
 
 Dealing with entities
 =====================
 
-SlapOM is an OMM hence entities do not know anything about the LDAP database nor their structure: they are just flexible data containers::
+SlapOM is an OMM hence entities do not know anything about the LDAP database nor their structure: they are just flexible data containers:
+
+.. code-block:: php
 
     $user['mail'];         // $user->getMail();
     $user->mail;           // $user->getMail();
     $user->getMail();      // $user->get('mail');
-    $user->get('mail');    // $mail
+    $user->get('mail');    // $mail, raw data from LDAP
 
 If you override the ``getMail()`` accessor, your calls to ``$user['mail']`` and ``$user->mail`` will reflect your overload. You cannot override the generic ``get('mail')`` as this is the only way to access to raw data extracted from the database.
 
-Modifying the entities data follows the same principle. To save an entity, just call the ``save()`` function of the mapper class and give it your modified object::
+Modifying the entities data follows the same principle. To save an entity, just call the ``save()`` function of the mapper class and gives it your modified object:
+
+.. code-block:: php
 
   $user['mail'] = 'newMail@maildomain.net'; // $user->setMail('newMail@maildomain.net');
   $user->isModified(); // true
@@ -166,7 +184,7 @@ Modifying the entities data follows the same principle. To save an entity, just 
   $user->isPersisted(); // true
 
 Tests
-*******
+*****
 The entire SlapOM library is unit tested with **Atoum** (http://downloads.atoum.org/). You can run the test suite with the command::
 
   php /{wherever the atoum.phar is}/mageekguy.atoum.phar -d tests/SlapOM/Tests/Units/
@@ -175,4 +193,4 @@ Or class by class::
 
   php tests/SlapOM/Tests/Units/{File name}
 
-Before run it, make sure you have loaded the LDIF fixtures (test/fixtures/ldap_datas.ldif) in your LDAP testing server and edited the tests/config/config.ini file.
+Before runnning the unit tests, you will need to load in your LDAP testing server the LDIF fixtures (test/fixtures/ldap_datas.ldif) and edit the tests/config/config.ini file.
