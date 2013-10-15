@@ -112,7 +112,7 @@ class Connection
             {
                 $this->log(sprintf("LDAP ERROR '%s' -- Deleting {%s}.", ldap_error($this->getHandler()), print_r($del_attr, true)), \SlapOM\LoggerInterface::LOGLEVEL_CRITICAL);
 
-                throw new LdapException(sprintf("Error while DELETING attributes {%s} in dn='%s'.", join(', ', $del_attr), $dn), $this->getHandler(), $this->error);
+                throw new LdapException(sprintf("Error while DELETING attributes {%s} in dn='%s'.", join(', ', array_keys($del_attr)), $dn), $this->getHandler(), $this->error);
             }
 
             $this->log(sprintf("Removing attributes '%s' for dn='%s'.", join(', ', array_keys($del_attr)), $dn));
