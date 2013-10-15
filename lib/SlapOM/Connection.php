@@ -114,7 +114,8 @@ class Connection
 
                 throw new LdapException(sprintf("Error while DELETING attributes {%s} in dn='%s'.", join(', ', $del_attr), $dn), $this->getHandler(), $this->error);
             }
-            $this->log(sprintf("Removing attribute '%s'.", $del_attr));
+
+            $this->log(sprintf("Removing attributes '%s' for dn='%s'.", join(', ', array_keys($del_attr)), $dn));
         }
 
         if (count($mod_attr) > 0)
