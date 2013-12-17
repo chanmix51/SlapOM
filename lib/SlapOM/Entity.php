@@ -207,4 +207,9 @@ abstract class Entity implements \ArrayAccess
 
         return $values;
     }
+
+    public function dump()
+    {
+        return $this->values;
+    }
 }
