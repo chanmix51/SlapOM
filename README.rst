@@ -28,11 +28,11 @@ Project structure
 Generation and hydration example
 ********************************
 
-Here is the scenario: you want to retrieve your "person" objectClass from the LDAP server and make its fields available into a User PHP class to display the user name, email and group informations.
+Here is the scenario: you want to retrieve your "person" objectClass from the LDAP server and make its fields available in a User PHP class to display the user name, email and group informations.
 
 Step 1 - Create the inherited objects
 =====================================
-The first step is to create the object (=entity=User) that will represent the "person" objectClass AND his mapper.
+The first step is to create the object (aka entity or User) that will represent the "person" objectClass AND his mapper.
 
 Entity class (must extend \\SlapOM\\Entity)
 -------------------------------------------
@@ -44,7 +44,7 @@ Entity class (must extend \\SlapOM\\Entity)
 
 Mapper class (must extend \\SlapOM\\EntityMap and must be named "{Entity class name}Map")
 -----------------------------------------------------------------------------------------
-The abstract class EntityMap contains an abstract method configure(), you have to override this method to set up the required parameters.
+The abstract class EntityMap contains an abstract method configure(); you must override this method to set up the required parameters.
 
 .. code-block:: php
 
@@ -137,7 +137,7 @@ Of course, most of the time, you are not interested in fetching all entities fro
 
   $result = $userMap->find('(|(mail=*@maildomain.net)(name=user*))');
 
-Note that the returning value of the ``getObjectClassFilter()`` method will be appended to you search string. The final search string will really be ``(&(objectClass=user)(|(mail=*@maildomain.net)(name=user*)))``. 
+Note that the return value of the ``getObjectClassFilter()`` method will be prepended to your search string. The final search string will really be ``(&(objectClass=user)(|(mail=*@maildomain.net)(name=user*)))``. 
 
 To manage more complex queries, you might use the ``BinaryFilter`` class:
 
@@ -157,7 +157,7 @@ In case you have the DN of a record, use the ``fetch()`` method to get the corre
 Projection operator
 ===================
 
-By default queries return collections that pop hydrated objects. These instances are by default fed with the fields declared in their according map class. This behavior can be overloaded using the ``getSearchFields()`` method. Even though it is a good idea to declare the user password as a binary field in the user map class, it would not a good idea to fetch it from the database every time a user is retrieved. This method is the right place to strip (or add) fields from your searches.
+By default queries return collections that pop hydrated objects. These instances are by default fed with the fields declared in their corresponding map class. This behavior can be overloaded using the ``getSearchFields()`` method. Even though it is a good idea to declare the user password as a binary field in the user map class, it would not a good idea to fetch it from the database every time a user is retrieved. This method is the right place to strip (or add) fields from your searches.
 
 Dealing with entities
 =====================
@@ -173,7 +173,7 @@ SlapOM is an OMM hence entities do not know anything about the LDAP database nor
 
 If you override the ``getMail()`` accessor, your calls to ``$user['mail']`` and ``$user->mail`` will reflect your overload. You cannot override the generic ``get('mail')`` as this is the only way to access to raw data extracted from the database.
 
-Modifying the entities data follows the same principle. To save an entity, just call the ``save()`` function of the mapper class and gives it your modified object:
+Modifying the entity's data follows the same principle. To save an entity, just call the ``save()`` function of the mapper class and give it your modified object:
 
 .. code-block:: php
 
@@ -193,4 +193,4 @@ Or class by class::
 
   php tests/SlapOM/Tests/Units/{File name}
 
-Before runnning the unit tests, you will need to load in your LDAP testing server the LDIF fixtures (test/fixtures/ldap_datas.ldif) and edit the tests/config/config.ini file.
+Before runnning the unit tests, you will need to load into your LDAP testing server the LDIF fixtures (test/fixtures/ldap_datas.ldif) and edit the tests/config/config.ini file.
