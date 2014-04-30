@@ -14,6 +14,17 @@ class Connection
     protected $error;
     protected $logger;
 
+    /**
+     * Upgrades the security of a plain connection to use encrypted channel.
+     * When true, ldap_start_tls() is called.
+     * Note:
+     * ldaps:// (on port 636) is NOT the same as using STARTTLS on port 389.
+     * Do not use if already connected to LDAP Server via SSL i.e. "ldaps://"
+     *
+     * @var bool
+     */
+    protected $useTls = false;
+
     public function __construct($host, $login, $password = null, $port = 389)
     {
         $this->login = $login;
@@ -28,6 +39,11 @@ class Connection
         {
             ldap_unbind($this->handler);
         }
+    }
+
+    public function setTls($b)
+    {
+        $this->useTls = $b;
     }
 
     public function addLogger(\SlapOM\LoggerInterface $logger)
@@ -143,9 +159,11 @@ class Connection
     {
         $this->handler = ldap_connect($this->host, $this->port);
 
-        ldap_get_option($this->handler,LDAP_OPT_ERROR_STRING,$this->error);
+        ldap_get_option($this->handler, LDAP_OPT_ERROR_STRING, $this->error);
         ldap_set_option($this->handler, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($this->handler, LDAP_OPT_REFERRALS, 0);
+
+        if ($this->useTls) ldap_start_tls($this->handler);
 
         if (!@ldap_bind($this->handler, $this->login, $this->password))
         {
