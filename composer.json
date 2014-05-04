@@ -16,6 +16,6 @@
         "ext-ldap": "*"
     },
     "autoload": {
-        "psr-0": { "SlapOM": "." }
+        "psr-0": { "SlapOM": "lib/" }
     }
 }
