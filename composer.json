@@ -1,12 +1,14 @@
 {
-    "name": "chanmix51/slap-om",
+    "name": "chanmix51/slapom",
     "type": "library",
     "description": "Small Object Model Manager for LDAP",
     "homepage": "http://github.com/chanmix51/SlapOM",
     "license": "CC-BY-SA-3.0",
     "authors": [
         {
-            "name": "Grégoire Hubert"
+            "name": "Grégoire HUBERT",
+            "email": "hubert.greg@gmail.com",
+            "homepage": "http://www.coolkeums.org"
         }
     ],
     "require": {
