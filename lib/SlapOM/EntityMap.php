@@ -121,7 +121,12 @@ abstract class EntityMap
 
     protected function getObjectClassFilter()
     {
-      return sprintf("(objectClass=%s)", $this->ldap_object_class);
+        if (is_string($this->ldap_object_class)) {
+            return sprintf("(objectClass=%s)", $this->ldap_object_class);
+        }
+        elseif (is_array($this->ldap_object_class)) {
+            return '(objectClass=' . implode(')(objectClass=', $this->ldap_object_class) . ')';
+        }
     }
 
     protected function checkDn($dn)
