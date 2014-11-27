@@ -21,8 +21,20 @@ class TextUtils
     public static function camelize($lower_case_and_underscored_word)
     {
         $tmp = $lower_case_and_underscored_word;
-        $tmp = static::pregtr($tmp, array('#/(.?)#e'    => "'::'.strtoupper('\\1')",
-            '/(^|_|-)+(.)/e' => "strtoupper('\\2')"));
+        $tmp = preg_replace_callback(
+            '#/(.?)#',
+            function ($matches) {
+                return sprintf('::%s', strtoupper($matches[1]));
+            },
+            $tmp
+        );
+        $tmp = preg_replace_callback(
+            '/(^|_|-)+(.)/',
+            function ($matches) {
+                return strtoupper($matches[2]);
+            },
+            $tmp 
+        );
 
         return $tmp;
     }
@@ -38,20 +50,12 @@ class TextUtils
     {
         $tmp = $camel_cased_word;
         $tmp = str_replace('::', '/', $tmp);
-        $tmp = static::pregtr($tmp, array('/([A-Z]+)([A-Z][a-z])/' => '\\1_\\2',
-            '/([a-z\d])([A-Z])/'     => '\\1_\\2'));
+        $tmp = preg_replace(
+            array('/([A-Z]+)([A-Z][a-z])/', '/([a-z\d])([A-Z])/'),
+            array('\\1_\\2', '\\1_\\2'),
+            $tmp
+        );
 
         return strtolower($tmp);
-    }
-
-    /**
-     * Returns subject replaced with regular expression matchs
-     *
-     * @param mixed $search        subject to search
-     * @param array $replacePairs  array of search => replace pairs
-     **/
-    public static function pregtr($search, $replacePairs)
-    {
-        return preg_replace(array_keys($replacePairs), array_values($replacePairs), $search);
     }
 }
