@@ -107,7 +107,7 @@ abstract class EntityMap
 
         foreach ($attributes as $attr)
         {
-            $entry[$attr] = $entity->has($attr) ? $entity[$attr] : null;
+            $entry[$attr] = $entity->has($attr) ? $entity->get($attr) : null;
         }
 
         $this->connection->modify($entity->getDn(), $entry);
