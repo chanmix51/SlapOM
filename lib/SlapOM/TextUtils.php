@@ -13,18 +13,17 @@ class TextUtils
      * Returns a camelized string from a lower case and underscored string by replaceing slash with
      * double-colon and upper-casing each letter preceded by an underscore.
      *
-     * @param  string $lower_case_and_underscored_word  String to camelize.
+     * @param  string $word  String to camelize.
      *
      * @return string Camelized string.
      **/
 
-    public static function camelize($lower_case_and_underscored_word)
+    public static function camelize($word)
     {
-        $tmp = $lower_case_and_underscored_word;
-        $tmp = static::pregtr($tmp, array('#/(.?)#e'    => "'::'.strtoupper('\\1')",
-            '/(^|_|-)+(.)/e' => "strtoupper('\\2')"));
+        $word = preg_replace_callback('#/(.?)#', function($match) { return strtoupper($match[1]); }, $word);
+        $word = preg_replace_callback('/(^|_|-)+(.)/' , function($match) { return strtoupper($match[2]); }, $word);
 
-        return $tmp;
+        return $word;
     }
 
     /**
