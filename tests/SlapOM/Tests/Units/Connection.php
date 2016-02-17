@@ -69,15 +69,17 @@ class Connection extends \atoum
 
     public function testModify()
     {
+        $dn = 'uid=user.1999,ou=People,dc=example,dc=com';
+
         $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
 
-        $result = $connection->modify('uid=user.1999,ou=People,dc=example,dc=com', array('mail' => 'newMail@plop.com'));
+        $result = $connection->modify($dn, array('mail' => 'newMail@plop.com'));
 
         $this->assert
                 ->boolean($result)
                 ->isTrue();
 
-        $result = $connection->modify('uid=user.1999,ou=People,dc=example,dc=com', array('mail' => array('newMail1@plop.com', 'newMail2@plop.com', 'newMail3@plop.com')));
+        $result = $connection->modify($dn, array('mail' => array('newMail1@plop.com', 'newMail2@plop.com', 'newMail3@plop.com')));
 
         $this->assert
                 ->boolean($result)
@@ -85,17 +87,17 @@ class Connection extends \atoum
 
         $this->assert
                 ->exception(function() use ($connection) {
-                            $connection->modify('uid=user.1999,ou=People,dc=example,dc=com', array('objectclass' => 'protectedObjectClass'));
+                            $connection->modify($dn, array('objectclass' => 'protectedObjectClass'));
                         })
                 ->isInstanceOf('\SlapOM\Exception\Ldap')
-                ->hasMessage('ERROR Error while modifying dn \'uid=user.1999,ou=People,dc=example,dc=com\'.. LDAP ERROR (65) -- Object class violation --. Object class violation');
+                ->hasMessage("ERROR Error while modifying dn '$dn'.. LDAP ERROR (65) -- Object class violation --. Object class violation");
 
         $this->assert
                 ->exception(function() use ($connection) {
-                            $connection->modify('uid=user.1999,ou=People,dc=example,dc=com', array('l' => null));
+                            $connection->modify($dn, array('l' => null));
                         })
                 ->isInstanceOf('\SlapOM\Exception\Ldap')
-                ->hasMessage('ERROR Error while modifying dn \'uid=user.1999,ou=People,dc=example,dc=com\'.. LDAP ERROR (21) -- Invalid syntax --. Invalid syntax');
+                ->hasMessage("ERROR Error while modifying dn '$dn'.. LDAP ERROR (21) -- Invalid syntax --. Invalid syntax");
     }
 
 }
