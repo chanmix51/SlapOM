@@ -1,0 +1,24 @@
+language: php
+sudo: false
+
+addons:
+    apt:
+        packages:
+            - ldap-utils
+            - slapd
+
+install:
+    - composer install
+
+before_script:
+    - test -e /tmp/slapd || mkdir /tmp/slapd
+    - slapd -f tests/config/ldap.conf -h ldap://localhost:3389 &
+    - sleep 3
+    - ldapadd  -h localhost:3389 -D cn=admin,dc=example,dc=com -w test -f tests/fixtures/ldap_datas.ldif > /dev/null
+    - ln -sf config.ini.dist tests/config/config.ini
+
+script: ./vendor/bin/atoum
+
+after_script:
+    - kill -9 $(cat /tmp/slapd/slapd.pid)
+    - rm -r /tmp/slapd
