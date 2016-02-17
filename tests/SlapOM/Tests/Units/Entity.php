@@ -2,8 +2,6 @@
 
 namespace SlapOM\Tests\Units;
 
-include __DIR__ . '/../../../bootstrap/autoload.php';
-
 use \mageekguy\atoum;
 
 class Entity extends atoum\test
