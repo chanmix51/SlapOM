@@ -47,7 +47,7 @@ class EntityMap extends \atoum
 
         $this->assert
                 ->object($result)
-                ->isInstanceOf('ArrayIterator');
+                ->isInstanceOf('SlapOM\Collection');
 
         $this->assert
                 ->integer(count($result))
@@ -76,10 +76,6 @@ class EntityMap extends \atoum
         $this->assert
                 ->integer(count($result))
                 ->isEqualTo(1);
-
-        $this->assert
-                ->array($result[0]['objectclass'])
-                ->hasSize(4);
     }
 
     public function testGetAttributeNames()
@@ -118,7 +114,7 @@ class EntityMap extends \atoum
                 ->isEqualTo(0);
 
         $this->assert
-                ->integer($map->getAttributeModifiers('objectclass'))
+                ->integer($map->getAttributeModifiers('objectClass'))
                 ->isEqualTo(\SlapOM\EntityMap::FIELD_MULTIVALUED);
     }
 
@@ -127,8 +123,8 @@ class EntityMap extends \atoum
         $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
         $map = $connection->getMapFor('SlapOM\Tests\Units\UserForTest3');
 
-        $result = $map->find('(uid=user.1999)');
-        $user = $result[0];
+        $result = $map->find('(uid=user.1998)');
+        $user = $result->current();
 
         $this->assert
                 ->boolean($user->isPersisted())
@@ -143,8 +139,8 @@ class EntityMap extends \atoum
                 ->boolean($user->isPersisted())
                 ->isTrue();
 
-        $result = $map->find('(uid=user.1999)');
-        $user = $result[0];
+        $result = $map->find('(uid=user.1998)');
+        $user = $result->current();
 
         $this->assert
                 ->boolean($user->isPersisted())
@@ -160,7 +156,7 @@ class EntityMap extends \atoum
                             $map->save($user);
                         })
                 ->isInstanceOf('\SlapOM\Exception\SlapOM')
-                ->hasMessage('This fonctionality is not yet implemented.');
+                ->hasMessage('The create feature is not yet implemented.');
     }
 
 }
@@ -224,7 +220,7 @@ class UserForTest3Map extends \SlapOM\EntityMap
         $this->addAttribute('cn');
         $this->addAttribute('l');
         $this->addAttribute('mail');
-        $this->addAttribute('objectclass', \SlapOM\EntityMap::FIELD_MULTIVALUED);
+        $this->addAttribute('objectClass', \SlapOM\EntityMap::FIELD_MULTIVALUED);
     }
 
 }

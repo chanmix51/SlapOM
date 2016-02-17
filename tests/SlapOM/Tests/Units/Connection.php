@@ -42,26 +42,27 @@ class Connection extends \atoum
     public function testSearch()
     {
         $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
-        $result = $connection->search('dc=example,dc=com', '(objectClass=person)', array('cn'));
+        $userMap = $connection->getMapFor('SlapOM\Tests\Units\UserForTest1');
+        $result = $connection->search($userMap, 'dc=example,dc=com', '(objectClass=person)', array('cn'));
         $this->assert
-                ->array($result)
-                ->hasSize(2001);
+                ->integer(count($result))
+                ->isEqualTo(2000);
 
         $connection = new \SlapOM\Connection('fakeHost', LDAP_BIND_DN, LDAP_PASSWORD);
 
         $this->assert
-                ->exception(function() use ($connection) {
-                            $connection->search('dc=example,dc=com', '(objectClass=person)', array('cn'));
+                ->exception(function() use ($connection, $userMap) {
+                            $connection->search($userMap, 'dc=example,dc=com', '(objectClass=person)', array('cn'));
                         })
                 ->isInstanceOf('\SlapOM\Exception\Ldap')
-                ->hasMessage('ERROR Could not bind to LDAP host=\'fakeHost:389\' with login=\'cn=root\'.. LDAP ERROR (-1) -- Can\'t contact LDAP server --. Can\'t contact LDAP server');
+                ->hasMessage('ERROR Could not bind to LDAP host=\'fakeHost:389\' with login=\'cn=admin,dc=example,dc=com\'.. LDAP ERROR (-1) -- Can\'t contact LDAP server --. Can\'t contact LDAP server');
 
 
         $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
 
         $this->assert
-                ->exception(function() use ($connection) {
-                            $connection->search('dc=example,dc=com', '(&=test)', array('cn'));
+                ->exception(function() use ($connection, $userMap) {
+                            $connection->search($userMap, 'dc=example,dc=com', '(&=test)', array('cn'));
                         })
                 ->isInstanceOf('\SlapOM\Exception\Ldap')
                 ->hasMessage('ERROR Error while filtering dn \'dc=example,dc=com\' with filter \'(&=test)\'.. LDAP ERROR (-7) -- Bad search filter --. Bad search filter');
@@ -86,18 +87,17 @@ class Connection extends \atoum
                 ->isTrue();
 
         $this->assert
-                ->exception(function() use ($connection) {
-                            $connection->modify($dn, array('objectclass' => 'protectedObjectClass'));
+                ->exception(function() use ($connection, $dn) {
+                            $connection->modify($dn, array('objectClass' => 'protectedObjectClass'));
                         })
-                ->isInstanceOf('\SlapOM\Exception\Ldap')
-                ->hasMessage("ERROR Error while modifying dn '$dn'.. LDAP ERROR (65) -- Object class violation --. Object class violation");
+                ->isInstanceOf('\SlapOM\Exception\Ldap');
 
         $this->assert
-                ->exception(function() use ($connection) {
-                            $connection->modify($dn, array('l' => null));
+                ->exception(function() use ($connection, $dn) {
+                            $connection->modify($dn, array('objectClass' => null));
                         })
                 ->isInstanceOf('\SlapOM\Exception\Ldap')
-                ->hasMessage("ERROR Error while modifying dn '$dn'.. LDAP ERROR (21) -- Invalid syntax --. Invalid syntax");
+                ->hasMessage("ERROR Error while DELETING attributes {objectClass} in dn='$dn'.. LDAP ERROR (65) -- Object class violation --. Object class violation");
     }
 
 }
