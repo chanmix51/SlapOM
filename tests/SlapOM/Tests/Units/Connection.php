@@ -44,7 +44,7 @@ class Connection extends atoum\test
     public function testSearch()
     {
         $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
-        $result = $connection->search('dc=knplabs,dc=com', '(objectClass=person)', array('cn'));
+        $result = $connection->search('dc=example,dc=com', '(objectClass=person)', array('cn'));
         $this->assert
                 ->array($result)
                 ->hasSize(2001);
@@ -53,7 +53,7 @@ class Connection extends atoum\test
 
         $this->assert
                 ->exception(function() use ($connection) {
-                            $connection->search('dc=knplabs,dc=com', '(objectClass=person)', array('cn'));
+                            $connection->search('dc=example,dc=com', '(objectClass=person)', array('cn'));
                         })
                 ->isInstanceOf('\SlapOM\Exception\Ldap')
                 ->hasMessage('ERROR Could not bind to LDAP host=\'fakeHost:389\' with login=\'cn=root\'.. LDAP ERROR (-1) -- Can\'t contact LDAP server --. Can\'t contact LDAP server');
@@ -63,23 +63,23 @@ class Connection extends atoum\test
 
         $this->assert
                 ->exception(function() use ($connection) {
-                            $connection->search('dc=knplabs,dc=com', '(&=test)', array('cn'));
+                            $connection->search('dc=example,dc=com', '(&=test)', array('cn'));
                         })
                 ->isInstanceOf('\SlapOM\Exception\Ldap')
-                ->hasMessage('ERROR Error while filtering dn \'dc=knplabs,dc=com\' with filter \'(&=test)\'.. LDAP ERROR (-7) -- Bad search filter --. Bad search filter');
+                ->hasMessage('ERROR Error while filtering dn \'dc=example,dc=com\' with filter \'(&=test)\'.. LDAP ERROR (-7) -- Bad search filter --. Bad search filter');
     }
 
     public function testModify()
     {
         $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
 
-        $result = $connection->modify('uid=user.1999,ou=People,dc=knplabs,dc=com', array('mail' => 'newMail@plop.com'));
+        $result = $connection->modify('uid=user.1999,ou=People,dc=example,dc=com', array('mail' => 'newMail@plop.com'));
 
         $this->assert
                 ->boolean($result)
                 ->isTrue();
 
-        $result = $connection->modify('uid=user.1999,ou=People,dc=knplabs,dc=com', array('mail' => array('newMail1@plop.com', 'newMail2@plop.com', 'newMail3@plop.com')));
+        $result = $connection->modify('uid=user.1999,ou=People,dc=example,dc=com', array('mail' => array('newMail1@plop.com', 'newMail2@plop.com', 'newMail3@plop.com')));
 
         $this->assert
                 ->boolean($result)
@@ -87,17 +87,17 @@ class Connection extends atoum\test
 
         $this->assert
                 ->exception(function() use ($connection) {
-                            $connection->modify('uid=user.1999,ou=People,dc=knplabs,dc=com', array('objectclass' => 'protectedObjectClass'));
+                            $connection->modify('uid=user.1999,ou=People,dc=example,dc=com', array('objectclass' => 'protectedObjectClass'));
                         })
                 ->isInstanceOf('\SlapOM\Exception\Ldap')
-                ->hasMessage('ERROR Error while modifying dn \'uid=user.1999,ou=People,dc=knplabs,dc=com\'.. LDAP ERROR (65) -- Object class violation --. Object class violation');
+                ->hasMessage('ERROR Error while modifying dn \'uid=user.1999,ou=People,dc=example,dc=com\'.. LDAP ERROR (65) -- Object class violation --. Object class violation');
 
         $this->assert
                 ->exception(function() use ($connection) {
-                            $connection->modify('uid=user.1999,ou=People,dc=knplabs,dc=com', array('l' => null));
+                            $connection->modify('uid=user.1999,ou=People,dc=example,dc=com', array('l' => null));
                         })
                 ->isInstanceOf('\SlapOM\Exception\Ldap')
-                ->hasMessage('ERROR Error while modifying dn \'uid=user.1999,ou=People,dc=knplabs,dc=com\'.. LDAP ERROR (21) -- Invalid syntax --. Invalid syntax');                        
+                ->hasMessage('ERROR Error while modifying dn \'uid=user.1999,ou=People,dc=example,dc=com\'.. LDAP ERROR (21) -- Invalid syntax --. Invalid syntax');
     }
 
 }
@@ -114,7 +114,7 @@ class UserForTest1Map extends \SlapOM\EntityMap
 
     protected function configure()
     {
-        $this->base_dn = 'dc=knplabs,dc=com';
+        $this->base_dn = 'dc=example,dc=com';
         $this->ldap_object_class = 'person';
         $this->entity_class = 'SlapOM\Tests\Units\UserForTest1';
         $this->addAttribute('cn');

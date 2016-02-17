@@ -187,7 +187,7 @@ class BadUser2Map extends \SlapOM\EntityMap
 
     protected function configure()
     {
-        $this->base_dn = 'dc=knplabs,dc=com';
+        $this->base_dn = 'dc=example,dc=com';
     }
 
 }
@@ -197,7 +197,7 @@ class BadUser3Map extends \SlapOM\EntityMap
 
     protected function configure()
     {
-        $this->base_dn = 'dc=knplabs,dc=com';
+        $this->base_dn = 'dc=example,dc=com';
         $this->ldap_object_class = 'person';
     }
 
@@ -208,7 +208,7 @@ class BadUser4Map extends \SlapOM\EntityMap
 
     protected function configure()
     {
-        $this->base_dn = 'dc=knplabs,dc=com';
+        $this->base_dn = 'dc=example,dc=com';
         $this->ldap_object_class = 'person';
         $this->entity_class = 'SlapOM\Tests\Units\UserForTest3';
     }
@@ -220,7 +220,7 @@ class UserForTest3Map extends \SlapOM\EntityMap
 
     protected function configure()
     {
-        $this->base_dn = 'dc=knplabs,dc=com';
+        $this->base_dn = 'dc=example,dc=com';
         $this->ldap_object_class = 'person';
         $this->entity_class = 'SlapOM\Tests\Units\UserForTest3';
         $this->addAttribute('cn');
