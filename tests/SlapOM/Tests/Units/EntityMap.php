@@ -2,9 +2,7 @@
 
 namespace SlapOM\Tests\Units;
 
-use \mageekguy\atoum;
-
-class EntityMap extends atoum\test
+class EntityMap extends \atoum
 {
 
     public function test__construct()
@@ -138,7 +136,7 @@ class EntityMap extends atoum\test
 
         $newMail = sprintf("random.mail.%d@plop.org", rand(0, 1000));
 
-        $user->setMail($newMail);     
+        $user->setMail($newMail);
         $map->save($user);
 
         $this->assert
@@ -169,7 +167,7 @@ class EntityMap extends atoum\test
 
 class UserForTest3 extends \SlapOM\Entity
 {
-    
+
 }
 
 class BadUser1Map extends \SlapOM\EntityMap
@@ -177,7 +175,7 @@ class BadUser1Map extends \SlapOM\EntityMap
 
     protected function configure()
     {
-        
+
     }
 
 }

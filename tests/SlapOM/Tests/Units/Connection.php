@@ -2,9 +2,7 @@
 
 namespace SlapOM\Tests\Units;
 
-use \mageekguy\atoum;
-
-class Connection extends atoum\test
+class Connection extends \atoum
 {
 
     public function testGetMapFor()
@@ -104,7 +102,7 @@ class Connection extends atoum\test
 
 class UserForTest1 extends \SlapOM\Entity
 {
-    
+
 }
 
 class UserForTest1Map extends \SlapOM\EntityMap
