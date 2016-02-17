@@ -2,10 +2,6 @@
 
 namespace SlapOM\Tests\Units;
 
-include __DIR__ . '/../../../bootstrap/autoload.php';
-
-require_once __DIR__ . '/../../../../../mageekguy.atoum.phar';
-
 use \mageekguy\atoum;
 
 class EntityMap extends atoum\test
