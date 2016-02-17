@@ -9,7 +9,7 @@ class Connection extends atoum\test
 
     public function testGetMapFor()
     {
-        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
 
         $userMap = $connection->getMapFor('SlapOM\Tests\Units\UserForTest1');
 
@@ -43,7 +43,7 @@ class Connection extends atoum\test
 
     public function testSearch()
     {
-        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
         $result = $connection->search('dc=knplabs,dc=com', '(objectClass=person)', array('cn'));
         $this->assert
                 ->array($result)
@@ -59,7 +59,7 @@ class Connection extends atoum\test
                 ->hasMessage('ERROR Could not bind to LDAP host=\'fakeHost:389\' with login=\'cn=root\'.. LDAP ERROR (-1) -- Can\'t contact LDAP server --. Can\'t contact LDAP server');
 
 
-        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
 
         $this->assert
                 ->exception(function() use ($connection) {
@@ -71,7 +71,7 @@ class Connection extends atoum\test
 
     public function testModify()
     {
-        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
 
         $result = $connection->modify('uid=user.1999,ou=People,dc=knplabs,dc=com', array('mail' => 'newMail@plop.com'));
 
