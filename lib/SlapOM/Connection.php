@@ -150,6 +150,36 @@ class Connection
         return true;
     }
 
+    public function create($dn, $entry)
+    {
+        $attr = array();
+        foreach ($entry as $name => $value)
+        {
+            if (is_array($value))
+            {
+                $attr[$name] = $value;
+            }
+            else
+            {
+                $attr[$name] = array($value);
+            }
+        }
+
+        $this->log(sprintf("CREATE dn='%s'.", $dn));
+
+        $ret = @ldap_add($this->getHandler(), $dn, $attr);
+        if ($ret === false)
+        {
+            $this->log(sprintf("LDAP ERROR '%s' -- Creating {%s}.", ldap_error($this->getHandler()), print_r($attr, true)), \SlapOM\LoggerInterface::LOGLEVEL_CRITICAL);
+
+            throw new LdapException(sprintf("Error while CREATING <pre>%s</pre> in dn='%s'.", print_r($attr, true), $dn), $this->getHandler(), $this->error);
+        }
+
+        $this->log(sprintf("Changing LDAP entry {%s} with {%s}.", $dn, print_r($attr, true)));
+
+        return true;
+    }
+
     protected function isOpen()
     {
         return !(is_null($this->handler) or $this->handler === false);

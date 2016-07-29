@@ -11,6 +11,7 @@ abstract class EntityMap
     protected $connection;
     protected $base_dn;
     protected $ldap_object_class;
+    protected $common_name_identifier;
     protected $entity_class;
     protected $attributes;
     protected $read_only_attributes = array('dn', 'objectClass');
@@ -29,6 +30,11 @@ abstract class EntityMap
         if (!isset($this->ldap_object_class))
         {
             throw new SlapOMException(sprintf("LDAP 'objectClass' is not set after configured class '%s'.", get_class($this)));
+        }
+
+        if (!isset($this->common_name_identifier))
+        {
+            throw new SlapOMException(sprintf("Common Name Identifier is not set after configured class '%s'.", get_class($this)));
         }
 
         if (!isset($this->entity_class))
@@ -96,13 +102,9 @@ abstract class EntityMap
 
     public function save(\SlapOM\Entity $entity, Array $attributes = null)
     {
-        if (false === isset($entity['dn']))
-        {
-            Throw new SlapOMException("The create feature is not yet implemented.");
-        }
-
         $attributes = is_null($attributes) ? $this->getAttributeNames() : array_intersect($this->getAttributeNames(), $attributes);
         $attributes = array_diff($attributes, $this->read_only_attributes);
+
         $entry = array();
 
         foreach ($attributes as $attr)
@@ -110,7 +112,19 @@ abstract class EntityMap
             $entry[$attr] = $entity->has($attr) ? $entity->get($attr) : null;
         }
 
-        $this->connection->modify($entity->getDn(), $entry);
+        if (false === isset($entity['dn']))
+        {
+            $dn = $this->common_name_identifier . '=' . $entity->getUid() . ',' . $this->base_dn;
+            $entity->setDn($dn);
+
+            $entry['objectClass'] = $this->ldap_object_class;
+
+            $this->connection->create($entity->getDn(), $entry);
+        }
+        else {
+            $this->connection->modify($entity->getDn(), $entry);
+        }
+
         $entity->persist();
     }
 

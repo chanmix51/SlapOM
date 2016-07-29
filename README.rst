@@ -56,6 +56,7 @@ The abstract class EntityMap contains an abstract method configure(); you must o
           /* Set up the required options */
           $this->base_dn = 'dc=company,dc=com'
           $this->ldap_object_class = 'person';
+          $this->common_name_identifier = 'uid';
           $this->entity_class = 'User';
 
           /* Set up the fields that you want to retrieve in your User class */
