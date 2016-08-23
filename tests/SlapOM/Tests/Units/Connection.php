@@ -2,18 +2,12 @@
 
 namespace SlapOM\Tests\Units;
 
-include __DIR__ . '/../../../bootstrap/autoload.php';
-
-require_once __DIR__ . '/../../../../../mageekguy.atoum.phar';
-
-use \mageekguy\atoum;
-
-class Connection extends atoum\test
+class Connection extends \atoum
 {
 
     public function testGetMapFor()
     {
-        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
 
         $userMap = $connection->getMapFor('SlapOM\Tests\Units\UserForTest1');
 
@@ -47,68 +41,70 @@ class Connection extends atoum\test
 
     public function testSearch()
     {
-        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
-        $result = $connection->search('dc=knplabs,dc=com', '(objectClass=person)', array('cn'));
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
+        $userMap = $connection->getMapFor('SlapOM\Tests\Units\UserForTest1');
+        $result = $connection->search($userMap, 'dc=example,dc=com', '(objectClass=person)', array('cn'));
         $this->assert
-                ->array($result)
-                ->hasSize(2001);
+                ->integer(count($result))
+                ->isEqualTo(2000);
 
         $connection = new \SlapOM\Connection('fakeHost', LDAP_BIND_DN, LDAP_PASSWORD);
 
         $this->assert
-                ->exception(function() use ($connection) {
-                            $connection->search('dc=knplabs,dc=com', '(objectClass=person)', array('cn'));
+                ->exception(function() use ($connection, $userMap) {
+                            $connection->search($userMap, 'dc=example,dc=com', '(objectClass=person)', array('cn'));
                         })
                 ->isInstanceOf('\SlapOM\Exception\Ldap')
-                ->hasMessage('ERROR Could not bind to LDAP host=\'fakeHost:389\' with login=\'cn=root\'.. LDAP ERROR (-1) -- Can\'t contact LDAP server --. Can\'t contact LDAP server');
+                ->hasMessage('ERROR Could not bind to LDAP host=\'fakeHost:389\' with login=\'cn=admin,dc=example,dc=com\'.. LDAP ERROR (-1) -- Can\'t contact LDAP server --. Can\'t contact LDAP server');
 
 
-        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
 
         $this->assert
-                ->exception(function() use ($connection) {
-                            $connection->search('dc=knplabs,dc=com', '(&=test)', array('cn'));
+                ->exception(function() use ($connection, $userMap) {
+                            $connection->search($userMap, 'dc=example,dc=com', '(&=test)', array('cn'));
                         })
                 ->isInstanceOf('\SlapOM\Exception\Ldap')
-                ->hasMessage('ERROR Error while filtering dn \'dc=knplabs,dc=com\' with filter \'(&=test)\'.. LDAP ERROR (-7) -- Bad search filter --. Bad search filter');
+                ->hasMessage('ERROR Error while filtering dn \'dc=example,dc=com\' with filter \'(&=test)\'.. LDAP ERROR (-7) -- Bad search filter --. Bad search filter');
     }
 
     public function testModify()
     {
-        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
+        $dn = 'uid=user.1999,ou=People,dc=example,dc=com';
 
-        $result = $connection->modify('uid=user.1999,ou=People,dc=knplabs,dc=com', array('mail' => 'newMail@plop.com'));
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
 
-        $this->assert
-                ->boolean($result)
-                ->isTrue();
-
-        $result = $connection->modify('uid=user.1999,ou=People,dc=knplabs,dc=com', array('mail' => array('newMail1@plop.com', 'newMail2@plop.com', 'newMail3@plop.com')));
+        $result = $connection->modify($dn, array('mail' => 'newMail@plop.com'));
 
         $this->assert
                 ->boolean($result)
                 ->isTrue();
 
-        $this->assert
-                ->exception(function() use ($connection) {
-                            $connection->modify('uid=user.1999,ou=People,dc=knplabs,dc=com', array('objectclass' => 'protectedObjectClass'));
-                        })
-                ->isInstanceOf('\SlapOM\Exception\Ldap')
-                ->hasMessage('ERROR Error while modifying dn \'uid=user.1999,ou=People,dc=knplabs,dc=com\'.. LDAP ERROR (65) -- Object class violation --. Object class violation');
+        $result = $connection->modify($dn, array('mail' => array('newMail1@plop.com', 'newMail2@plop.com', 'newMail3@plop.com')));
 
         $this->assert
-                ->exception(function() use ($connection) {
-                            $connection->modify('uid=user.1999,ou=People,dc=knplabs,dc=com', array('l' => null));
+                ->boolean($result)
+                ->isTrue();
+
+        $this->assert
+                ->exception(function() use ($connection, $dn) {
+                            $connection->modify($dn, array('objectClass' => 'protectedObjectClass'));
+                        })
+                ->isInstanceOf('\SlapOM\Exception\Ldap');
+
+        $this->assert
+                ->exception(function() use ($connection, $dn) {
+                            $connection->modify($dn, array('objectClass' => null));
                         })
                 ->isInstanceOf('\SlapOM\Exception\Ldap')
-                ->hasMessage('ERROR Error while modifying dn \'uid=user.1999,ou=People,dc=knplabs,dc=com\'.. LDAP ERROR (21) -- Invalid syntax --. Invalid syntax');                        
+                ->hasMessage("ERROR Error while DELETING attributes {objectClass} in dn='$dn'.. LDAP ERROR (65) -- Object class violation --. Object class violation");
     }
 
 }
 
 class UserForTest1 extends \SlapOM\Entity
 {
-    
+
 }
 
 class UserForTest1Map extends \SlapOM\EntityMap
@@ -118,7 +114,7 @@ class UserForTest1Map extends \SlapOM\EntityMap
 
     protected function configure()
     {
-        $this->base_dn = 'dc=knplabs,dc=com';
+        $this->base_dn = 'dc=example,dc=com';
         $this->ldap_object_class = 'person';
         $this->entity_class = 'SlapOM\Tests\Units\UserForTest1';
         $this->addAttribute('cn');

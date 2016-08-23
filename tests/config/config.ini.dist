@@ -1,4 +1,5 @@
 [ldap]
 host = localhost
-bindDn = "cn=root"
-password = root
+port = 3389
+bindDn = "cn=admin,dc=example,dc=com"
+password = test

@@ -2,18 +2,12 @@
 
 namespace SlapOM\Tests\Units;
 
-include __DIR__ . '/../../../bootstrap/autoload.php';
-
-require_once __DIR__ . '/../../../../../mageekguy.atoum.phar';
-
-use \mageekguy\atoum;
-
-class EntityMap extends atoum\test
+class EntityMap extends \atoum
 {
 
     public function test__construct()
     {
-        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
 
         $this->assert
                 ->exception(function() use ($connection) {
@@ -46,14 +40,14 @@ class EntityMap extends atoum\test
 
     public function testFind()
     {
-        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
         $map = $connection->getMapFor('SlapOM\Tests\Units\UserForTest3');
 
         $result = $map->find();
 
         $this->assert
                 ->object($result)
-                ->isInstanceOf('ArrayIterator');
+                ->isInstanceOf('SlapOM\Collection');
 
         $this->assert
                 ->integer(count($result))
@@ -82,15 +76,11 @@ class EntityMap extends atoum\test
         $this->assert
                 ->integer(count($result))
                 ->isEqualTo(1);
-
-        $this->assert
-                ->array($result[0]['objectclass'])
-                ->hasSize(4);
     }
 
     public function testGetAttributeNames()
     {
-        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
         $map = $connection->getMapFor('SlapOM\Tests\Units\UserForTest3');
 
         $this->assert
@@ -100,7 +90,7 @@ class EntityMap extends atoum\test
 
     public function testAddAttribute()
     {
-        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
         $map = $connection->getMapFor('SlapOM\Tests\Units\UserForTest3');
 
         $this->assert
@@ -116,7 +106,7 @@ class EntityMap extends atoum\test
 
     public function testGetAttributeModifiers()
     {
-        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
         $map = $connection->getMapFor('SlapOM\Tests\Units\UserForTest3');
 
         $this->assert
@@ -124,17 +114,17 @@ class EntityMap extends atoum\test
                 ->isEqualTo(0);
 
         $this->assert
-                ->integer($map->getAttributeModifiers('objectclass'))
+                ->integer($map->getAttributeModifiers('objectClass'))
                 ->isEqualTo(\SlapOM\EntityMap::FIELD_MULTIVALUED);
     }
 
     public function testSave()
     {
-        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD);
+        $connection = new \SlapOM\Connection(LDAP_HOST, LDAP_BIND_DN, LDAP_PASSWORD, LDAP_PORT);
         $map = $connection->getMapFor('SlapOM\Tests\Units\UserForTest3');
 
-        $result = $map->find('(uid=user.1999)');
-        $user = $result[0];
+        $result = $map->find('(uid=user.1998)');
+        $user = $result->current();
 
         $this->assert
                 ->boolean($user->isPersisted())
@@ -142,15 +132,15 @@ class EntityMap extends atoum\test
 
         $newMail = sprintf("random.mail.%d@plop.org", rand(0, 1000));
 
-        $user->setMail($newMail);     
+        $user->setMail($newMail);
         $map->save($user);
 
         $this->assert
                 ->boolean($user->isPersisted())
                 ->isTrue();
 
-        $result = $map->find('(uid=user.1999)');
-        $user = $result[0];
+        $result = $map->find('(uid=user.1998)');
+        $user = $result->current();
 
         $this->assert
                 ->boolean($user->isPersisted())
@@ -166,14 +156,14 @@ class EntityMap extends atoum\test
                             $map->save($user);
                         })
                 ->isInstanceOf('\SlapOM\Exception\SlapOM')
-                ->hasMessage('This fonctionality is not yet implemented.');
+                ->hasMessage('The create feature is not yet implemented.');
     }
 
 }
 
 class UserForTest3 extends \SlapOM\Entity
 {
-    
+
 }
 
 class BadUser1Map extends \SlapOM\EntityMap
@@ -181,7 +171,7 @@ class BadUser1Map extends \SlapOM\EntityMap
 
     protected function configure()
     {
-        
+
     }
 
 }
@@ -191,7 +181,7 @@ class BadUser2Map extends \SlapOM\EntityMap
 
     protected function configure()
     {
-        $this->base_dn = 'dc=knplabs,dc=com';
+        $this->base_dn = 'dc=example,dc=com';
     }
 
 }
@@ -201,7 +191,7 @@ class BadUser3Map extends \SlapOM\EntityMap
 
     protected function configure()
     {
-        $this->base_dn = 'dc=knplabs,dc=com';
+        $this->base_dn = 'dc=example,dc=com';
         $this->ldap_object_class = 'person';
     }
 
@@ -212,7 +202,7 @@ class BadUser4Map extends \SlapOM\EntityMap
 
     protected function configure()
     {
-        $this->base_dn = 'dc=knplabs,dc=com';
+        $this->base_dn = 'dc=example,dc=com';
         $this->ldap_object_class = 'person';
         $this->entity_class = 'SlapOM\Tests\Units\UserForTest3';
     }
@@ -224,13 +214,13 @@ class UserForTest3Map extends \SlapOM\EntityMap
 
     protected function configure()
     {
-        $this->base_dn = 'dc=knplabs,dc=com';
+        $this->base_dn = 'dc=example,dc=com';
         $this->ldap_object_class = 'person';
         $this->entity_class = 'SlapOM\Tests\Units\UserForTest3';
         $this->addAttribute('cn');
         $this->addAttribute('l');
         $this->addAttribute('mail');
-        $this->addAttribute('objectclass', \SlapOM\EntityMap::FIELD_MULTIVALUED);
+        $this->addAttribute('objectClass', \SlapOM\EntityMap::FIELD_MULTIVALUED);
     }
 
 }
