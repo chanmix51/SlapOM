@@ -101,6 +101,7 @@ class Connection extends atoum\test
                             $connection->modify('uid=user.1999,ou=People,dc=knplabs,dc=com', array('l' => null));
                         })
                 ->isInstanceOf('\SlapOM\Exception\Ldap')
+                ->hasCode(\SlapOM\Exception\Ldap::LDAP_OBJECT_CLASS_VIOLATION)
                 ->hasMessage('ERROR Error while modifying dn \'uid=user.1999,ou=People,dc=knplabs,dc=com\'.. LDAP ERROR (21) -- Invalid syntax --. Invalid syntax');                        
     }
 
