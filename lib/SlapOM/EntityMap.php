@@ -114,6 +114,15 @@ abstract class EntityMap
         $entity->persist();
     }
 
+    public function delete(\SlapOM\Entity $entity)
+    {
+        if (false === isset($entity['dn'])) {
+            throw new SlapOMException(sprintf("DN is not set on '%s'.", get_class($entity)));
+        }
+
+        $this->connection->delete($entity->getDn());
+    }
+
     public function getSearchFields()
     {
         return $this->getAttributeNames();
